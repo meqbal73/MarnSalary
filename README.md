@@ -1,13 +1,13 @@
-# Marn Local Dashboard
+# Marn Local Dashboard v4
 
-واجهة مرن مستقلة تعمل محليًا في المتصفح.
+Standalone Marn dashboard with localStorage persistence.
 
-## المزايا
-- تخزين البيانات في localStorage.
-- إدخال شهر كامل دفعة واحدة.
-- إضافة شفت بشكل منفرد.
-- تسجيل مبلغ الاستلام وحالة تم الاستلام.
-- تصدير نسخة احتياطية كاملة بصيغة JSON.
-- استيراد JSON مع دمج البيانات الحالية وعدم حذف الشهور غير المتعارضة.
-
-افتح index.html مباشرة أو ارفع الملفات إلى GitHub Pages.
+Features:
+- Empty initial state
+- Add single shifts
+- Add a full month at once
+- Choose number of days/shifts for bulk month entry
+- Arabic and English language modes
+- JSON export and import
+- Reset all Marn data with double confirmation
+- Light and dark themes
