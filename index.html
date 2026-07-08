@@ -61,6 +61,9 @@
         <div class="toolbar-actions">
           <button class="secondary-btn" id="addMonthBtn">+ إضافة شهر</button>
           <button class="primary-btn" id="bulkMonthBtn">إدخال شهر كامل</button>
+          <button class="secondary-btn" id="exportDataBtn">⬇ تصدير JSON</button>
+          <button class="secondary-btn" id="importDataBtn">⬆ استيراد JSON</button>
+          <input id="importDataInput" type="file" accept="application/json,.json" hidden>
           <button class="secondary-btn" id="editMonthBtn">تعديل الشهر الحالي</button>
           <button class="danger-btn" id="deleteMonthBtn">حذف الشهر الحالي</button>
           <button class="primary-btn" id="addShiftBtn">+ إضافة شفت</button>
@@ -491,6 +494,76 @@ function openEditMonthForm(){
   };
 }
 
+
+function exportJsonBackup(){
+  try{
+    const backup={
+      app:'Marn Local Dashboard',
+      formatVersion:1,
+      exportedAt:new Date().toISOString(),
+      data:{version:2,months:normalizeMonths(state.months)}
+    };
+    const json=JSON.stringify(backup,null,2);
+    const blob=new Blob([json],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    const stamp=new Date().toISOString().slice(0,10);
+    link.href=url;
+    link.download=`marn-backup-${stamp}.json`;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+    toast('تم تصدير نسخة JSON بنجاح');
+  }catch(error){
+    console.error(error);
+    toast('تعذر تصدير النسخة الاحتياطية');
+  }
+}
+
+function extractImportedMonths(parsed){
+  if(parsed?.data?.months && typeof parsed.data.months==='object') return parsed.data.months;
+  if(parsed?.months && typeof parsed.months==='object') return parsed.months;
+  if(parsed && typeof parsed==='object' && !Array.isArray(parsed)) return parsed;
+  throw new Error('INVALID_BACKUP');
+}
+
+async function importJsonBackup(file){
+  if(!file) return;
+  try{
+    const text=await file.text();
+    const parsed=JSON.parse(text);
+    const importedMonths=normalizeMonths(extractImportedMonths(parsed));
+    const keys=Object.keys(importedMonths);
+    if(!keys.length){ toast('ملف JSON لا يحتوي على شهور'); return; }
+
+    const conflicts=keys.filter(key=>state.months[key]);
+    if(conflicts.length){
+      const labels=conflicts.slice(0,4).map(key=>monthDisplayName(key,importedMonths[key])).join('، ');
+      const more=conflicts.length>4?` و${conflicts.length-4} أخرى`:'';
+      if(!confirm(`يوجد ${conflicts.length} شهر موجود مسبقًا (${labels}${more}). هل تريد استبدال الأشهر المتعارضة فقط، مع الاحتفاظ ببقية بياناتك؟`)){
+        const onlyNew=Object.fromEntries(Object.entries(importedMonths).filter(([key])=>!state.months[key]));
+        if(!Object.keys(onlyNew).length){ toast('لم يتم استيراد أي بيانات جديدة'); return; }
+        state.months={...state.months,...onlyNew};
+      }else{
+        state.months={...state.months,...importedMonths};
+      }
+    }else{
+      state.months={...state.months,...importedMonths};
+    }
+
+    activeMonth=getLatestMonthName();
+    saveState();
+    render();
+    toast(`تم استيراد ${keys.length} شهر بنجاح`);
+  }catch(error){
+    console.error(error);
+    toast(error instanceof SyntaxError?'ملف JSON غير صالح':'تعذر استيراد هذا الملف');
+  }finally{
+    $('#importDataInput').value='';
+  }
+}
+
 function deleteActiveMonth(){
   if(!activeMonth||!state.months[activeMonth]){ toast('لا يوجد شهر محدد'); return; }
   if(!confirm('حذف الشهر الحالي وكل شفتاته وبيانات الاستلام؟')) return;
@@ -506,6 +579,9 @@ $('#themeBtn').onclick=()=>{
 };
 $('#addMonthBtn').onclick=openAddMonthForm;
 $('#bulkMonthBtn').onclick=openBulkMonthForm;
+$('#exportDataBtn').onclick=exportJsonBackup;
+$('#importDataBtn').onclick=()=>$('#importDataInput').click();
+$('#importDataInput').addEventListener('change',e=>importJsonBackup(e.target.files?.[0]));
 $('#editMonthBtn').onclick=openEditMonthForm;
 $('#deleteMonthBtn').onclick=deleteActiveMonth;
 $('#addShiftBtn').onclick=()=>openShiftForm();
