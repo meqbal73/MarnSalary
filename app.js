@@ -2,14 +2,16 @@ const $ = (s, root=document) => root.querySelector(s);
 const LOCAL_PREFIX='calren-cloud-cache-v2-';
 const LANG='calren-lang';
 const THEME='calren-theme';
+const APPEARANCE='calren-appearance';
 const config=window.MARN_CONFIG||{};
 const configReady=/^https:\/\/.+\.supabase\.co$/.test(config.SUPABASE_URL||'')&&!!config.SUPABASE_PUBLISHABLE_KEY;
 const cloud=configReady&&window.supabase?window.supabase.createClient(config.SUPABASE_URL,config.SUPABASE_PUBLISHABLE_KEY):null;
 
-const translations={ar:{brandSub:'حاسبة الراتب بالساعات',today:'اليوم',unpaid:'المستحقات غير المستلمة',totalHours:'إجمالي الساعات',monthDue:'إجمالي مستحقات الشهر',shiftCount:'عدد الشفتات',hour:'ساعة',shift:'شفت',quickAdd:'إضافة شفت / مهمة جديدة',quickHint:'أدخل ساعات اليوم وسيُحسب المبلغ مباشرة.',date:'التاريخ',hours:'الساعات',minutes:'الدقائق',hourlyRate:'سعر الساعة',expectedAmount:'المبلغ المتوقع',add:'إضافة',addMonth:'إضافة شهر كامل',deleteMonth:'حذف الشهر كامل',calendar:'تقويم الشهر',goToday:'اليوم',workDay:'يوم عمل',autoOff:'إجازة تلقائية',monthOverview:'نظرة عامة على الشهر',received:'المبلغ المستلم',difference:'الفرق',shiftDetails:'تفاصيل الشفتات',time:'الوقت',duration:'المدة',amount:'المبلغ',actions:'الإجراءات',receivedAmount:'المبلغ المستلم (SAR)',markReceived:'تم استلام الراتب',settings:'الإعدادات',downloadJson:'تحميل ملف JSON',importJson:'إضافة ملف JSON',resetData:'إعادة جميع البيانات',language:'اللغة',theme:'لون الواجهة',logout:'تسجيل خروج',editShift:'تعديل الشفت',save:'حفظ'},en:{brandSub:'Hourly salary calculator',today:'Today',unpaid:'Unpaid entitlements',totalHours:'Total hours',monthDue:'Current month due',shiftCount:'Shifts',hour:'hours',shift:'shifts',quickAdd:'Add shift / task',quickHint:'Enter today’s hours and CALREN calculates the amount instantly.',date:'Date',hours:'Hours',minutes:'Minutes',hourlyRate:'Hourly rate',expectedAmount:'Expected amount',add:'Add',addMonth:'Add full month',deleteMonth:'Delete full month',calendar:'Monthly calendar',goToday:'Today',workDay:'Work day',autoOff:'Automatic day off',monthOverview:'Month overview',received:'Received amount',difference:'Difference',shiftDetails:'Shift details',time:'Time',duration:'Duration',amount:'Amount',actions:'Actions',receivedAmount:'Received amount (SAR)',markReceived:'Salary received',settings:'Settings',downloadJson:'Download JSON',importJson:'Import JSON',resetData:'Reset all data',language:'Language',theme:'Interface color',logout:'Log out',editShift:'Edit shift',save:'Save'}};
+const translations={ar:{brandSub:'حاسبة الراتب بالساعات',today:'اليوم',unpaid:'المستحقات غير المستلمة',totalHours:'إجمالي الساعات',monthDue:'إجمالي مستحقات الشهر',shiftCount:'عدد الشفتات',hour:'ساعة',shift:'شفت',quickAdd:'إضافة شفت / مهمة جديدة',quickHint:'أدخل ساعات اليوم وسيُحسب المبلغ مباشرة.',date:'التاريخ',hours:'الساعات',minutes:'الدقائق',hourlyRate:'سعر الساعة',expectedAmount:'المبلغ المتوقع',add:'إضافة',addMonth:'إضافة شهر كامل',deleteMonth:'حذف الشهر كامل',calendar:'تقويم الشهر',goToday:'اليوم',workDay:'يوم عمل',autoOff:'إجازة تلقائية',monthOverview:'نظرة عامة على الشهر',received:'المبلغ المستلم',difference:'الفرق',shiftDetails:'تفاصيل الشفتات',time:'الوقت',duration:'المدة',amount:'المبلغ',actions:'الإجراءات',receivedAmount:'المبلغ المستلم (SAR)',markReceived:'تم استلام الراتب',settings:'الإعدادات',downloadJson:'تحميل ملف JSON',importJson:'إضافة ملف JSON',resetData:'إعادة جميع البيانات',language:'اللغة',theme:'لون الواجهة',appearance:'المظهر',dark:'داكن',light:'فاتح',logout:'تسجيل خروج',editShift:'تعديل الشفت',save:'حفظ'},en:{brandSub:'Hourly salary calculator',today:'Today',unpaid:'Unpaid entitlements',totalHours:'Total hours',monthDue:'Current month due',shiftCount:'Shifts',hour:'hours',shift:'shifts',quickAdd:'Add shift / task',quickHint:'Enter today’s hours and CALREN calculates the amount instantly.',date:'Date',hours:'Hours',minutes:'Minutes',hourlyRate:'Hourly rate',expectedAmount:'Expected amount',add:'Add',addMonth:'Add full month',deleteMonth:'Delete full month',calendar:'Monthly calendar',goToday:'Today',workDay:'Work day',autoOff:'Automatic day off',monthOverview:'Month overview',received:'Received amount',difference:'Difference',shiftDetails:'Shift details',time:'Time',duration:'Duration',amount:'Amount',actions:'Actions',receivedAmount:'Received amount (SAR)',markReceived:'Salary received',settings:'Settings',downloadJson:'Download JSON',importJson:'Import JSON',resetData:'Reset all data',language:'Language',theme:'Interface color',appearance:'Appearance',dark:'Dark',light:'Light',logout:'Log out',editShift:'Edit shift',save:'Save'}};
 
 let lang=localStorage.getItem(LANG)||'ar';
 let theme=localStorage.getItem(THEME)||'emerald';
+let appearance=localStorage.getItem(APPEARANCE)||'dark';
 let viewDate=new Date();
 let currentUser=null;
 let authMode='login';
@@ -32,42 +34,83 @@ function monthKeyFromLegacy(name,month){
   const nums={january:'01',february:'02',march:'03',april:'04',may:'05',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12',يناير:'01',فبراير:'02',مارس:'03',أبريل:'04',ابريل:'04',مايو:'05',يونيو:'06',يوليو:'07',أغسطس:'08',اغسطس:'08',سبتمبر:'09',أكتوبر:'10',اكتوبر:'10',نوفمبر:'11',ديسمبر:'12'};
   return `2026-${nums[String(name).toLowerCase()]||String(name).match(/\d{1,2}/)?.[0]?.padStart(2,'0')||'01'}`;
 }
+function normalizeDateValue(value){
+  const text=String(value||'').trim();
+  const match=text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match?`${match[1]}-${match[2]}-${match[3]}`:text;
+}
+function durationParts(hoursValue,minutesValue){
+  const hours=Number(hoursValue||0),minutes=Number(minutesValue||0);
+  // الصيغة القديمة خزنت المدة كرقم عشري داخل hours، بينما الصيغة الجديدة تفصل الدقائق.
+  // إذا كانت hours عشرية فلا نضيف minutes مرة ثانية حتى لا تتحول 5 ساعات إلى 10 ساعات.
+  const totalMinutes=!Number.isInteger(hours)
+    ?Math.round(hours*60)
+    :Math.round(hours*60+minutes);
+  return {hours:Math.floor(totalMinutes/60),minutes:((totalMinutes%60)+60)%60,totalMinutes:Math.max(0,totalMinutes)};
+}
+function cleanState(input){
+  const source=input&&typeof input==='object'?input:emptyState();
+  const result={version:2,shifts:[],months:source.months&&typeof source.months==='object'?source.months:{},autoOff:Array.isArray(source.autoOff)?[...new Set(source.autoOff.map(normalizeDateValue).filter(Boolean))]:[]};
+  const seen=new Set();
+  (source.shifts||[]).forEach(raw=>{
+    const date=normalizeDateValue(raw?.date);
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+    const d=durationParts(raw?.hours,raw?.minutes);
+    if(d.totalMinutes<=0)return;
+    const rate=Number(raw?.rate??raw?.hourlyRate??0);
+    // التطابق يعتمد على التاريخ والمدة والسعر فقط. اختلاف التقريب في amount لا ينشئ شفتًا ثانيًا.
+    const signature=`${date}|${d.totalMinutes}|${Math.round(rate*100)}`;
+    if(seen.has(signature))return;
+    seen.add(signature);
+    result.shifts.push({
+      ...raw,
+      id:raw?.id||crypto.randomUUID(),
+      date,
+      hours:d.hours,
+      minutes:d.minutes,
+      rate,
+      amount:Number.isFinite(Number(raw?.amount))?Number(raw.amount):(d.totalMinutes/60)*rate,
+      start:raw?.start||'—'
+    });
+  });
+  return result;
+}
 function migrateAny(data){
   if(!data||typeof data!=='object')return emptyState();
-  if(Array.isArray(data.shifts)){
-    return {version:2,shifts:data.shifts.map(s=>{
-      const total=Number(s.hours||0)+Number(s.minutes||0)/60;
-      return {...s,id:s.id||crypto.randomUUID(),hours:Math.floor(total),minutes:Math.round((total-Math.floor(total))*60),rate:Number(s.rate||s.hourlyRate||0),amount:Number(s.amount??total*Number(s.rate||s.hourlyRate||0))};
-    }),months:data.months&&typeof data.months==='object'?data.months:{},autoOff:Array.isArray(data.autoOff)?data.autoOff:[]};
-  }
+  if(Array.isArray(data.shifts))return cleanState(data);
   const out=emptyState();
   Object.entries(data.months||{}).forEach(([name,month])=>{
     const mk=monthKeyFromLegacy(name,month);
     const rateDefault=Number(month?.rate||25);
     (month?.shifts||[]).forEach(raw=>{
-      let date,total,rate,amount;
+      let date,totalMinutes,rate,amount;
       if(Array.isArray(raw)){
-        const day=Number(raw[0]||1), parts=String(raw[1]||'0').split(':').map(Number);
-        total=(parts[0]||0)+(parts[1]||0)/60; amount=Number(raw[2]||0); rate=total?amount/total:rateDefault;
+        const day=Number(raw[0]||1),parts=String(raw[1]||'0').split(':').map(Number);
+        totalMinutes=Math.round((parts[0]||0)*60+(parts[1]||0));
+        amount=Number(raw[2]||0);rate=totalMinutes?amount/(totalMinutes/60):rateDefault;
         date=`${mk}-${String(day).padStart(2,'0')}`;
       }else{
-        date=raw.date||`${mk}-${String(raw.day||1).padStart(2,'0')}`;
-        total=Number(raw.hours||0)+Number(raw.minutes||0)/60; rate=Number(raw.rate||raw.hourlyRate||rateDefault); amount=Number(raw.amount??total*rate);
+        date=normalizeDateValue(raw?.date||`${mk}-${String(raw?.day||1).padStart(2,'0')}`);
+        const d=durationParts(raw?.hours,raw?.minutes);
+        totalMinutes=d.totalMinutes;rate=Number(raw?.rate??raw?.hourlyRate??rateDefault);amount=Number(raw?.amount??(totalMinutes/60)*rate);
       }
-      out.shifts.push({id:raw?.id||crypto.randomUUID(),date,hours:Math.floor(total),minutes:Math.round((total-Math.floor(total))*60),rate,amount,start:raw?.start||'—'});
+      out.shifts.push({id:raw?.id||crypto.randomUUID(),date,hours:Math.floor(totalMinutes/60),minutes:totalMinutes%60,rate,amount,start:raw?.start||'—'});
     });
     out.months[mk]={received:Number(month?.receivedAmount??month?.sent??0),settled:Boolean(month?.received||month?.settled)};
   });
-  return out;
+  return cleanState(out);
 }
 function mergeStates(...states){
-  const result=emptyState(), seen=new Set();
+  const result=emptyState();
   states.map(migrateAny).forEach(st=>{
-    st.shifts.forEach(s=>{const sig=`${s.date}|${s.hours}|${s.minutes}|${s.rate}|${s.amount}`;if(!seen.has(sig)){seen.add(sig);result.shifts.push(s)}});
-    Object.entries(st.months||{}).forEach(([k,m])=>{const old=result.months[k]||{};result.months[k]={received:Math.max(Number(old.received||0),Number(m.received||m.receivedAmount||0)),settled:Boolean(old.settled||m.settled||m.received)}});
+    result.shifts.push(...st.shifts);
+    Object.entries(st.months||{}).forEach(([k,m])=>{
+      const old=result.months[k]||{};
+      result.months[k]={received:Math.max(Number(old.received||0),Number(m.received||m.receivedAmount||0)),settled:Boolean(old.settled||m.settled||m.received)};
+    });
     result.autoOff=[...new Set([...result.autoOff,...(st.autoOff||[])])];
   });
-  return result;
+  return cleanState(result);
 }
 function normalize(data){return migrateAny(data)}
 function readCache(){
@@ -78,7 +121,7 @@ function readCache(){
 function backupBeforeMigration(source){
   try{localStorage.setItem(`calren-pre-migration-backup-${currentUser?.id||'guest'}-${Date.now()}`,JSON.stringify(source))}catch(e){console.warn(e)}
 }
-function writeCache(){localStorage.setItem(cacheKey(),JSON.stringify(state))}
+function writeCache(){state=cleanState(state);localStorage.setItem(cacheKey(),JSON.stringify(state))}
 function setSync(type,text){const dot=$('#syncDot'),label=$('#syncText');if(!dot||!label)return;dot.className=`sync-dot ${type||''}`.trim();label.textContent=text}
 async function loadCloud(){
   const local=readCache(); state=local; render();
@@ -89,16 +132,19 @@ async function loadCloud(){
   const cloudRaw=data?.data||null;
   if(cloudRaw)backupBeforeMigration(cloudRaw);
   const cloudState=migrateAny(cloudRaw);
-  state=mergeStates(cloudState,local);
+  // Supabase هو المصدر الأساسي. نستخدم النسخة المحلية عند غياب بيانات السحابة،
+  // أو ندمجها بعد إزالة التطابقات الحقيقية فقط.
+  state=hasUsefulData(cloudState)?mergeStates(cloudState,local):local;
+  state=cleanState(state);
   writeCache(); render();
-  // لا نرفع حالة فارغة، ونرفع فقط بعد دمج الصيغ القديمة والجديدة.
+  // نحفظ النسخة المنظفة لإزالة أي شفتات مكررة سبق أن رفعتها نسخة قديمة.
   if(hasUsefulData(state)){
     const {error:saveError}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});
     if(saveError){console.error(saveError);setSync('error',lang==='ar'?'تعذر حفظ التحويل':'Migration save failed');return}
   }
   setSync('',lang==='ar'?'تم استرجاع البيانات':'Data restored');
 }
-function save(){writeCache();if(!cloud||!currentUser)return;clearTimeout(saveTimer);setSync('syncing',lang==='ar'?'جارٍ الحفظ...':'Saving...');saveTimer=setTimeout(async()=>{const {error}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الحفظ':'Save failed');toast(lang==='ar'?'تعذر الحفظ في Supabase':'Cloud save failed')}else setSync('',lang==='ar'?'تم الحفظ':'Saved')},300)}
+function save(){state=cleanState(state);writeCache();if(!cloud||!currentUser)return;clearTimeout(saveTimer);setSync('syncing',lang==='ar'?'جارٍ الحفظ...':'Saving...');saveTimer=setTimeout(async()=>{const {error}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الحفظ':'Save failed');toast(lang==='ar'?'تعذر الحفظ في Supabase':'Cloud save failed')}else setSync('',lang==='ar'?'تم الحفظ':'Saved')},300)}
 
 function key(d){return d.toISOString().slice(0,7)}
 function isoLocal(d){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`}
@@ -109,6 +155,7 @@ function monthData(){const k=key(viewDate),shifts=state.shifts.filter(s=>s.date.
 function allUnpaid(){const months=new Set([...Object.keys(state.months),...state.shifts.map(s=>s.date.slice(0,7))]);let sum=0;months.forEach(k=>{const due=state.shifts.filter(s=>s.date.startsWith(k)).reduce((a,s)=>a+Number(s.amount||0),0);const rec=Number(state.months[k]?.received||0);if(!state.months[k]?.settled)sum+=Math.max(0,due-rec)});return sum}
 
 function applyTheme(){document.documentElement.dataset.theme=theme;$('#themeLabel').textContent=theme==='emerald'?'Emerald Green':lang==='ar'?'بنفسجي':'Purple'}
+function applyAppearance(){document.documentElement.dataset.appearance=appearance;const label=$('#appearanceLabel');if(label)label.textContent=appearance==='dark'?(lang==='ar'?'داكن':'Dark'):(lang==='ar'?'فاتح':'Light');const btn=$('#appearanceBtn');if(btn)btn.firstChild.textContent=appearance==='dark'?'☾ ':'☀ ' }
 function render(){applyLang();applyTheme();renderToday();renderCalendar();renderTable();renderStats();updateLive()}
 function applyLang(){document.documentElement.lang=lang;document.documentElement.dir=lang==='ar'?'rtl':'ltr';document.querySelectorAll('[data-i18n]').forEach(e=>e.textContent=translations[lang][e.dataset.i18n]||e.textContent);$('#languageLabel').textContent=lang==='ar'?'العربية':'English';applyAuthLanguage()}
 function renderToday(){const d=new Date();$('#todayDate').textContent=d.toLocaleDateString(lang==='ar'?'ar-SA-u-ca-gregory':'en-GB',{year:'numeric',month:'long',day:'numeric'});$('#todayDay').textContent=d.toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{weekday:'long'});$('#shiftDate').value||=isoLocal(d)}
@@ -130,8 +177,9 @@ $('#deleteMonthBtn').onclick=()=>{if(confirm(lang==='ar'?'حذف جميع بيا
 $('#receivedAmount').oninput=()=>{const k=key(viewDate);state.months[k]??={};state.months[k].received=Number($('#receivedAmount').value||0);save();renderStats()};
 $('#settleBtn').onclick=()=>{const k=key(viewDate);state.months[k]??={};state.months[k].received=Number($('#receivedAmount').value||0);state.months[k].settled=true;save();renderStats();toast(lang==='ar'?'تم إغلاق مستحقات الشهر':'Month settled')};
 function toggleDrawer(open){$('#settingsDrawer').classList.toggle('open',open);$('#settingsDrawer').setAttribute('aria-hidden',String(!open));$('#drawerBackdrop').hidden=!open}$('#settingsBtn').onclick=()=>toggleDrawer(true);$('#drawerClose').onclick=$('#drawerBackdrop').onclick=()=>toggleDrawer(false);
-function toggleLang(){lang=lang==='ar'?'en':'ar';localStorage.setItem(LANG,lang);render()}$('#languageBtn').onclick=$('#drawerLanguage').onclick=toggleLang;
+function toggleLang(){lang=lang==='ar'?'en':'ar';localStorage.setItem(LANG,lang);render();applyAppearance()}$('#languageBtn').onclick=$('#drawerLanguage').onclick=toggleLang;
 $('#themeBtn').onclick=()=>{theme=theme==='emerald'?'purple':'emerald';localStorage.setItem(THEME,theme);applyTheme()};
+$('#appearanceBtn').onclick=()=>{appearance=appearance==='dark'?'light':'dark';localStorage.setItem(APPEARANCE,appearance);applyAppearance()};
 $('#downloadJson').onclick=()=>{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(state,null,2)],{type:'application/json'}));a.download='calren-backup.json';a.click();URL.revokeObjectURL(a.href)};
 $('#importJson').onchange=async e=>{try{state=normalize(JSON.parse(await e.target.files[0].text()));enforceSixDayRule();save();render();toast(lang==='ar'?'تم استيراد البيانات':'Data imported')}catch{toast(lang==='ar'?'ملف غير صالح':'Invalid file')}};
 $('#resetData').onclick=()=>{if(confirm(lang==='ar'?'إعادة جميع البيانات؟':'Reset all data?')){state=emptyState();save();render()}};
@@ -147,5 +195,5 @@ $('#authForm').onsubmit=async e=>{e.preventDefault();if(!cloud)return setAuthMes
 $('#forgotPasswordBtn').onclick=async()=>{const email=$('#authEmail').value.trim();if(!email)return setAuthMessage(lang==='ar'?'اكتب بريدك أولًا':'Enter your email first','error');const {error}=await cloud.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});setAuthMessage(error?error.message:(lang==='ar'?'تم إرسال رابط إعادة التعيين':'Password reset link sent'),error?'error':'success')};
 $('.logout').onclick=async()=>{if(cloud)await cloud.auth.signOut()};
 
-applyTheme();applyLang();renderToday();
+applyTheme();applyAppearance();applyLang();renderToday();
 (async()=>{if(!cloud){showAuth();setAuthMessage(lang==='ar'?'تعذر تهيئة Supabase. تحقق من config.js':'Supabase is not configured. Check config.js','error');return}cloud.auth.onAuthStateChange((_event,session)=>setTimeout(()=>session?.user?showApp(session.user):showAuth(),0));const {data:{session}}=await cloud.auth.getSession();session?.user?await showApp(session.user):showAuth()})();
