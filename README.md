@@ -37,3 +37,6 @@
 
 ## ملاحظة أمنية مهمة
 استخدم Publishable/anon key فقط في الواجهة. لا تضع Service Role key داخل ملفات الموقع أبدًا.
+
+## Data source
+CALREN now reads and writes salary, shift, month, and payment data only from Supabase. Browser localStorage is used only for interface preferences (language, accent color, and dark/light appearance). No salary data is merged from localStorage.

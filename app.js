@@ -1,5 +1,4 @@
 const $ = (s, root=document) => root.querySelector(s);
-const LOCAL_PREFIX='calren-cloud-cache-v2-';
 const LANG='calren-lang';
 const THEME='calren-theme';
 const APPEARANCE='calren-appearance';
@@ -19,9 +18,6 @@ let state={version:2,shifts:[],months:{},autoOff:[]};
 let saveTimer=null;
 
 function emptyState(){return{version:2,shifts:[],months:{},autoOff:[]}}
-function cacheKey(){return `${LOCAL_PREFIX}${currentUser?.id||'guest'}`}
-function oldUserCacheKey(){return `marn-cloud-cache-${currentUser?.id||'guest'}`}
-function safeParse(value){try{return JSON.parse(value||'null')}catch{return null}}
 function hasUsefulData(data){
   if(!data||typeof data!=='object')return false;
   if(Array.isArray(data.shifts)&&data.shifts.length)return true;
@@ -100,51 +96,41 @@ function migrateAny(data){
   });
   return cleanState(out);
 }
-function mergeStates(...states){
-  const result=emptyState();
-  states.map(migrateAny).forEach(st=>{
-    result.shifts.push(...st.shifts);
-    Object.entries(st.months||{}).forEach(([k,m])=>{
-      const old=result.months[k]||{};
-      result.months[k]={received:Math.max(Number(old.received||0),Number(m.received||m.receivedAmount||0)),settled:Boolean(old.settled||m.settled||m.received)};
-    });
-    result.autoOff=[...new Set([...result.autoOff,...(st.autoOff||[])])];
-  });
-  return cleanState(result);
-}
 function normalize(data){return migrateAny(data)}
-function readCache(){
-  const candidates=[safeParse(localStorage.getItem(cacheKey())),safeParse(localStorage.getItem(oldUserCacheKey())),safeParse(localStorage.getItem('marn-dashboard-local-v2')),safeParse(localStorage.getItem('my-finance-data-v2'))].filter(Boolean);
-  const merged=mergeStates(...candidates);
-  return hasUsefulData(merged)?merged:emptyState();
-}
-function backupBeforeMigration(source){
-  try{localStorage.setItem(`calren-pre-migration-backup-${currentUser?.id||'guest'}-${Date.now()}`,JSON.stringify(source))}catch(e){console.warn(e)}
-}
-function writeCache(){state=cleanState(state);localStorage.setItem(cacheKey(),JSON.stringify(state))}
 function setSync(type,text){const dot=$('#syncDot'),label=$('#syncText');if(!dot||!label)return;dot.className=`sync-dot ${type||''}`.trim();label.textContent=text}
 async function loadCloud(){
-  const local=readCache(); state=local; render();
+  state=emptyState();
+  render();
   if(!cloud||!currentUser)return;
-  setSync('syncing',lang==='ar'?'جارٍ استرجاع البيانات...':'Restoring data...');
+  setSync('syncing',lang==='ar'?'جارٍ استرجاع البيانات من Supabase...':'Loading data from Supabase...');
   const {data,error}=await cloud.from('dashboard_data').select('data').eq('user_id',currentUser.id).maybeSingle();
-  if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الاتصال':'Sync failed');toast(lang==='ar'?'تم عرض آخر نسخة محفوظة محليًا':'Showing the latest local copy');return}
-  const cloudRaw=data?.data||null;
-  if(cloudRaw)backupBeforeMigration(cloudRaw);
-  const cloudState=migrateAny(cloudRaw);
-  // Supabase هو المصدر الأساسي. نستخدم النسخة المحلية عند غياب بيانات السحابة،
-  // أو ندمجها بعد إزالة التطابقات الحقيقية فقط.
-  state=hasUsefulData(cloudState)?mergeStates(cloudState,local):local;
-  state=cleanState(state);
-  writeCache(); render();
-  // نحفظ النسخة المنظفة لإزالة أي شفتات مكررة سبق أن رفعتها نسخة قديمة.
-  if(hasUsefulData(state)){
-    const {error:saveError}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});
-    if(saveError){console.error(saveError);setSync('error',lang==='ar'?'تعذر حفظ التحويل':'Migration save failed');return}
+  if(error){
+    console.error(error);
+    state=emptyState();
+    render();
+    setSync('error',lang==='ar'?'تعذر الاتصال بـ Supabase':'Supabase sync failed');
+    toast(lang==='ar'?'تعذر تحميل البيانات من Supabase':'Could not load data from Supabase');
+    return;
   }
-  setSync('',lang==='ar'?'تم استرجاع البيانات':'Data restored');
+  state=data?.data?migrateAny(data.data):emptyState();
+  state=cleanState(state);
+  render();
+  setSync('',lang==='ar'?'تم تحميل بيانات Supabase':'Supabase data loaded');
 }
-function save(){state=cleanState(state);writeCache();if(!cloud||!currentUser)return;clearTimeout(saveTimer);setSync('syncing',lang==='ar'?'جارٍ الحفظ...':'Saving...');saveTimer=setTimeout(async()=>{const {error}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الحفظ':'Save failed');toast(lang==='ar'?'تعذر الحفظ في Supabase':'Cloud save failed')}else setSync('',lang==='ar'?'تم الحفظ':'Saved')},300)}
+function save(){
+  state=cleanState(state);
+  if(!cloud||!currentUser)return;
+  clearTimeout(saveTimer);
+  setSync('syncing',lang==='ar'?'جارٍ الحفظ في Supabase...':'Saving to Supabase...');
+  saveTimer=setTimeout(async()=>{
+    const {error}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});
+    if(error){
+      console.error(error);
+      setSync('error',lang==='ar'?'تعذر الحفظ':'Save failed');
+      toast(lang==='ar'?'تعذر الحفظ في Supabase':'Cloud save failed');
+    }else setSync('',lang==='ar'?'تم الحفظ في Supabase':'Saved to Supabase');
+  },300);
+}
 
 function key(d){return d.toISOString().slice(0,7)}
 function isoLocal(d){const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}-${z(d.getMonth()+1)}-${z(d.getDate())}`}
