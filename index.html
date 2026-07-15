@@ -1,125 +1,155 @@
 <!doctype html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" data-theme="dark" data-palette="emerald">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#111827" />
-  <meta name="description" content="لوحة مرن المحلية لإدارة الشفتات والمستحقات" />
-  <title>لوحة مرن</title>
+  <meta name="theme-color" content="#050714" />
+  <meta name="description" content="CALREN - حاسبة الراتب بالساعات وإدارة الشفتات" />
+  <title>CALREN | حاسبة الراتب بالساعات</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
   <script src="config.js"></script>
-  <style>
-    .standalone-main{width:min(1500px,100%);margin:0 auto}
-    .local-pill{display:flex;align-items:center;gap:8px;padding:9px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface);color:var(--muted);font-size:13px}
-    .local-pill .dot{background:var(--good)}
-    .topbar-actions{display:flex;align-items:center;gap:10px}
-    .auth-screen{min-height:100vh;display:grid;place-items:center;padding:24px;background:var(--bg)}
-    .auth-card{width:min(460px,100%);background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:28px;box-shadow:var(--shadow)}
-    .auth-brand{text-align:center;margin-bottom:22px}.auth-brand h1{margin:8px 0 6px;font-size:30px}.auth-brand p{margin:0;color:var(--muted)}
-    .auth-logo{width:64px;height:64px;margin:auto;border-radius:20px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;font-weight:800;font-size:24px}
-    .auth-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0}.auth-tab{padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--surface-2);color:var(--text);font:inherit;font-weight:700;cursor:pointer}.auth-tab.active{background:var(--accent);color:#fff;border-color:transparent}
-    .auth-message{min-height:24px;font-size:13px;margin-top:8px;color:var(--muted)}.auth-message.error{color:var(--danger)}.auth-message.success{color:var(--good)}
-    .sync-pill{display:flex;align-items:center;gap:7px;padding:8px 11px;border:1px solid var(--line);border-radius:999px;background:var(--surface);font-size:12px;color:var(--muted)}
-    .sync-dot{width:8px;height:8px;border-radius:50%;background:var(--good)}.sync-dot.syncing{background:var(--warning)}.sync-dot.error{background:var(--danger)}
-    .account-line{word-break:break-all;color:var(--muted);font-size:13px}
-    .hidden{display:none!important}
-    .bar-item{flex:1;min-width:72px;height:100%;display:grid;grid-template-rows:auto 1fr auto;gap:8px;align-items:end;text-align:center}
-    .bar-track{height:190px;display:flex;align-items:end;justify-content:center;border-radius:14px;background:var(--surface-2);overflow:hidden;padding:0 8px}
-    .bar-fill{width:100%;max-width:56px;min-height:6px;border-radius:12px 12px 3px 3px;background:linear-gradient(180deg,var(--accent-2),var(--accent))}
-    .bar-item>span,.bar-item .bar-value{font-size:12px;color:var(--muted);white-space:nowrap}
-
-    .modal.modal-wide{width:min(980px,100%)}
-    .bulk-month-form{width:100%}
-    .bulk-table-head,.bulk-row{display:grid;grid-template-columns:1.5fr .75fr .75fr 1fr auto;gap:8px;align-items:center}
-    .bulk-table-head{padding:0 2px 8px;color:var(--muted);font-size:12px;font-weight:700}
-    .bulk-row{margin-bottom:8px}
-    .bulk-row input{width:100%;min-width:0;padding:11px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--text);font:inherit}
-    .danger-text{color:var(--danger)}
-    @media(max-width:720px){
-      .bulk-table-head{display:none}
-      .bulk-row{grid-template-columns:1fr 1fr}
-      .bulk-row input[name="date"]{grid-column:1/-1}
-      .bulk-row .mini-btn{grid-column:1/-1}
-    }
-    @media(max-width:640px){
-      .topbar{align-items:center}.topbar-actions{gap:7px}.local-pill{display:none}
-      .bars{overflow-x:auto;align-items:stretch}.bar-item{min-width:78px}.bar-track{height:175px}
-    }
-  </style>
 </head>
 <body>
   <section class="auth-screen" id="authScreen">
     <div class="auth-card">
-      <div class="auth-brand"><div class="auth-logo">M</div><h1 id="authTitle">دخل مرن</h1><p id="authSubtitle">سجّل الدخول للوصول إلى بياناتك من أي جهاز</p></div>
-      <div class="auth-tabs"><button class="auth-tab active" id="loginTab" type="button">تسجيل الدخول</button><button class="auth-tab" id="signupTab" type="button">إنشاء حساب</button></div>
+      <div class="auth-brand">
+        <div class="brand-logo" aria-hidden="true"><span>C</span></div>
+        <h1 id="authTitle">CALREN</h1>
+        <p id="authSubtitle">سجّل الدخول للوصول إلى بياناتك من أي جهاز</p>
+      </div>
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="loginTab" type="button">تسجيل الدخول</button>
+        <button class="auth-tab" id="signupTab" type="button">إنشاء حساب</button>
+      </div>
       <form class="form" id="authForm">
         <label class="field hidden" id="nameField"><span id="nameLabel">الاسم</span><input id="authName" type="text" autocomplete="name" minlength="2" placeholder="اسمك"></label>
         <label class="field"><span id="emailLabel">البريد الإلكتروني</span><input id="authEmail" type="email" autocomplete="email" required placeholder="name@example.com"></label>
         <label class="field"><span id="passwordLabel">كلمة المرور</span><input id="authPassword" type="password" minlength="6" autocomplete="current-password" required placeholder="••••••••"></label>
-        <button class="primary-btn" id="authSubmitBtn" type="submit" style="width:100%">دخول</button>
-        <button class="secondary-btn" id="forgotPasswordBtn" type="button" style="width:100%">نسيت كلمة المرور</button>
+        <button class="primary-btn full-width" id="authSubmitBtn" type="submit">دخول</button>
+        <button class="secondary-btn full-width" id="forgotPasswordBtn" type="button">نسيت كلمة المرور</button>
         <div class="auth-message" id="authMessage"></div>
       </form>
     </div>
   </section>
 
-  <main class="main-content standalone-main hidden" id="appShell">
-    <header class="topbar">
-      <div>
-        <h1 id="appTitle">دخل مرن</h1>
-        <p id="todayText"></p>
+  <main class="app-main hidden" id="appShell">
+    <header class="app-header">
+      <div class="brand-block">
+        <div class="brand-logo" aria-hidden="true"><span>C</span></div>
+        <div class="brand-copy">
+          <h1>CALREN</h1>
+          <strong id="appTitle">حاسبة الراتب بالساعات</strong>
+          <p id="sectionSubtitle">تابع ساعات عملك وتأكد من راتبك كامل</p>
+        </div>
       </div>
-      <div class="topbar-actions">
-        <div class="sync-pill" title="حالة مزامنة قاعدة البيانات"><span class="sync-dot" id="syncDot"></span><span id="syncText">متصل بالسحابة</span></div><button class="secondary-btn" id="accountBtn" type="button">الحساب</button>
-        <button class="icon-btn" id="themeBtn" title="تغيير المظهر">◐</button>
+
+      <div class="today-card">
+        <i data-lucide="calendar-days"></i>
+        <div><span id="todayLabel">اليوم</span><strong id="todayDate">—</strong><small id="todayText">—</small></div>
+      </div>
+
+      <div class="header-actions">
+        <button class="header-action" id="languageBtn" type="button" title="اللغة"><i class="accent-icon" data-lucide="languages"></i><span id="languageBtnText">العربية</span></button>
+        <button class="icon-action" id="themeBtn" type="button" title="الوضع الفاتح والداكن"><i data-lucide="moon-star"></i></button>
+        <button class="icon-action" id="settingsBtn" type="button" title="الإعدادات"><i data-lucide="settings"></i></button>
+        <button class="icon-action" id="accountBtn" type="button" title="الملف الشخصي" aria-expanded="false"><i data-lucide="circle-user-round"></i></button>
+
+        <div class="account-menu hidden" id="accountMenu">
+          <div class="account-head">
+            <div class="account-avatar" id="menuAvatar">C</div>
+            <div><strong id="menuProfileName">مستخدم CALREN</strong><small id="menuProfileEmail"></small></div>
+          </div>
+          <div class="menu-list">
+            <button class="menu-item" id="menuExportBtn" type="button"><i data-lucide="file-down"></i><span>تحميل ملف (JSON)</span></button>
+            <button class="menu-item" id="menuImportBtn" type="button"><i data-lucide="file-up"></i><span>إضافة ملف (JSON)</span></button>
+            <button class="menu-item" id="menuResetBtn" type="button"><i data-lucide="refresh-cw"></i><span>إعادة جميع البيانات</span></button>
+            <div class="menu-separator"></div>
+            <button class="menu-item" id="menuLanguageBtn" type="button"><i data-lucide="globe-2"></i><span>اللغة / Language</span></button>
+            <div class="menu-separator"></div>
+            <button class="menu-item danger" id="menuLogoutBtn" type="button"><i data-lucide="log-out"></i><span>تسجيل خروج</span></button>
+          </div>
+        </div>
       </div>
     </header>
 
-    <section class="view active" id="marnView">
-      <div class="section-toolbar">
-        <div>
-          <h2 id="sectionTitle">إدارة الشفتات والمستحقات</h2>
-          <p id="sectionSubtitle">بياناتك محفوظة ومزامنة مع حسابك على السحابة.</p>
-        </div>
-        <div class="toolbar-actions">
-          <button class="secondary-btn" id="addMonthBtn">+ إضافة شهر</button>
-          <button class="primary-btn" id="bulkMonthBtn">إدخال شهر كامل</button>
-          <button class="secondary-btn" id="settingsBtn">⚙ الإعدادات</button>
-          <input id="importDataInput" type="file" accept="application/json,.json" hidden>
-          <button class="secondary-btn" id="editMonthBtn">تعديل الشهر الحالي</button>
-          <button class="danger-btn" id="deleteMonthBtn">حذف الشهر الحالي</button>
-          <button class="primary-btn" id="addShiftBtn">+ إضافة شفت</button>
-        </div>
-      </div>
+    <div class="sync-strip"><span class="sync-dot" id="syncDot"></span><span id="syncText">متصل بالسحابة</span></div>
 
-      <div class="kpi-grid" style="margin-bottom:18px">
-        <article class="kpi-card"><span id="kpiDueLabel">المستحقات غير المستلمة</span><strong id="marnOnlyDueKpi">0</strong><small class="currencyLabel">ر.س</small></article>
-        <article class="kpi-card"><span id="kpiCurrentLabel">مستحق الشهر الحالي</span><strong id="marnCurrentExpectedKpi">0</strong><small class="currencyLabel">ر.س</small></article>
-        <article class="kpi-card"><span id="kpiHoursLabel">ساعات الشهر الحالي</span><strong id="marnCurrentHoursKpi">0</strong><small id="hoursMinutesLabel">ساعات ودقائق</small></article>
-        <article class="kpi-card"><span id="kpiPayLabel">راتب مرن القادم</span><strong id="marnNextPayKpi">—</strong><small id="marnNextPaySub">يوم 15 ميلادي</small></article>
-      </div>
-
-      <article class="panel" style="margin-bottom:18px">
-        <div class="panel-head"><div><span class="eyebrow" id="summaryEyebrow">ملخص مرن</span><h3 id="summaryTitle">المستحقات حسب الشهر</h3></div></div>
-        <div class="bars" id="marnOnlyBars"></div>
+    <section class="kpi-grid">
+      <article class="kpi-card danger-kpi">
+        <div class="kpi-top"><span id="kpiDueLabel">المستحقات غير المستلمة</span><div class="kpi-icon"><i data-lucide="wallet-cards"></i></div></div>
+        <strong id="marnOnlyDueKpi">0.00</strong><small class="currencyLabel">SAR</small>
+        <div class="kpi-status" id="dueStatus">ناقص</div>
       </article>
-
-      <div class="month-tabs" id="monthTabs"></div>
-      <article class="panel">
-        <div class="panel-head"><h3 id="activeMonthTitle">الشهر</h3><div class="summary-inline" id="monthSummary"></div></div>
-        <div class="settlement-card" id="monthSettlement"></div>
-        <div id="shiftsTable"></div>
+      <article class="kpi-card">
+        <div class="kpi-top"><span id="kpiHoursLabel">إجمالي الساعات</span><div class="kpi-icon"><i data-lucide="clock-3"></i></div></div>
+        <strong id="marnCurrentHoursKpi">0</strong><small id="hoursMinutesLabel">ساعة</small>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top"><span id="kpiCurrentLabel">إجمالي مستحقات الشهر</span><div class="kpi-icon"><i data-lucide="wallet"></i></div></div>
+        <strong id="marnCurrentExpectedKpi">0.00</strong><small class="currencyLabel">SAR</small>
+      </article>
+      <article class="kpi-card">
+        <div class="kpi-top"><span id="kpiPayLabel">عدد الشفتات</span><div class="kpi-icon"><i data-lucide="calendar-check-2"></i></div></div>
+        <strong id="marnNextPayKpi">0</strong><small id="marnNextPaySub">شفت</small>
       </article>
     </section>
+
+    <section class="panel quick-panel">
+      <div class="section-heading"><i data-lucide="zap"></i><h2 id="quickTitle">إضافة شفت / مهمة جديدة</h2></div>
+      <div class="quick-form">
+        <label class="field"><span id="quickDateLabel">التاريخ</span><input id="quickDate" type="date"></label>
+        <label class="field"><span id="quickHoursLabel">ساعات</span><div class="number-control"><button data-step-target="quickHours" data-step="-1" type="button">−</button><input id="quickHours" type="number" min="0" max="24" step="1" value="5"><button data-step-target="quickHours" data-step="1" type="button">+</button></div></label>
+        <label class="field"><span id="quickMinutesLabel">دقائق</span><div class="number-control"><button data-step-target="quickMinutes" data-step="-5" type="button">−</button><input id="quickMinutes" type="number" min="0" max="59" step="5" value="0"><button data-step-target="quickMinutes" data-step="5" type="button">+</button></div></label>
+        <label class="field"><span id="quickRateLabel">سعر الساعة</span><input id="quickRate" type="number" min="0" step="0.01" value="25"></label>
+        <div class="field"><span id="quickExpectedLabel">المبلغ المتوقع</span><div class="expected-box"><b id="quickExpected">125.00</b><small class="currencyLabel">SAR</small></div></div>
+        <button class="primary-btn" id="quickAddShiftBtn" type="button"><i data-lucide="plus"></i><span id="quickAddText">إضافة</span></button>
+      </div>
+    </section>
+
+    <section class="month-toolbar">
+      <div class="month-side-actions">
+        <button class="danger-btn" id="deleteMonthBtn" type="button"><i data-lucide="trash-2"></i><span id="deleteMonthText">حذف الشهر</span></button>
+        <button class="secondary-btn" id="editMonthBtn" type="button"><i data-lucide="pencil"></i><span id="editMonthText">تعديل</span></button>
+      </div>
+      <div class="month-navigator">
+        <button id="prevMonthBtn" type="button" title="الشهر السابق"><i data-lucide="chevron-right"></i></button>
+        <div class="month-label"><i data-lucide="calendar-range"></i><span id="currentMonthLabel">لا يوجد شهر</span></div>
+        <button id="nextMonthBtn" type="button" title="الشهر التالي"><i data-lucide="chevron-left"></i></button>
+      </div>
+      <div class="month-side-actions end">
+        <button class="secondary-btn" id="bulkMonthBtn" type="button"><i data-lucide="list-plus"></i><span id="bulkMonthText">شهر كامل</span></button>
+        <button class="secondary-btn" id="addShiftBtn" type="button"><i data-lucide="calendar-plus"></i><span id="addShiftText">إضافة شفت</span></button>
+        <button class="primary-btn" id="addMonthBtn" type="button"><i data-lucide="calendar-plus-2"></i><span id="addMonthText">إضافة شهر</span></button>
+      </div>
+    </section>
+
+    <section class="calendar-layout">
+      <article class="panel calendar-panel"><div class="calendar-grid" id="monthCalendar"></div></article>
+      <aside class="panel overview-panel"><h3 id="overviewTitle">نظرة عامة على الشهر</h3><div id="monthOverview"></div></aside>
+    </section>
+
+    <section class="panel table-panel">
+      <div class="panel-head"><div><h3 id="activeMonthTitle">تفاصيل الشفتات</h3><small id="monthSummary"></small></div></div>
+      <div id="shiftsTable"></div>
+      <div class="settlement-card" id="monthSettlement"></div>
+    </section>
+
+    <div class="hidden" id="monthTabs"></div>
+    <div class="hidden" id="marnOnlyBars"></div>
+    <span class="hidden" id="summaryEyebrow"></span><span class="hidden" id="summaryTitle"></span><span class="hidden" id="sectionTitle"></span>
+    <input id="importDataInput" type="file" accept="application/json,.json" hidden>
+
+    <footer class="footer"><b>CALREN</b> © <span id="footerYear">2026</span></footer>
   </main>
 
   <div class="modal-backdrop" id="modalBackdrop" hidden>
     <div class="modal" role="dialog" aria-modal="true">
-      <button class="modal-close" id="modalClose">×</button>
+      <button class="modal-close" id="modalClose" type="button">×</button>
       <div id="modalContent"></div>
     </div>
   </div>
@@ -131,9 +161,11 @@ const SEED_MONTHS = {};
 const STORAGE_KEY = 'marn-dashboard-local-v2';
 const OLD_FULL_APP_KEY = 'my-finance-data-v2';
 const THEME_KEY = 'marn-dashboard-theme';
+const PALETTE_KEY = 'marn-dashboard-palette';
 const LANGUAGE_KEY = 'marn-dashboard-language';
 let currentLanguage = (()=>{ try{return localStorage.getItem(LANGUAGE_KEY)||'ar';}catch(e){return 'ar';} })();
 const $ = (selector, root=document) => root.querySelector(selector);
+function refreshIcons(){ try{ window.lucide?.createIcons(); }catch(error){ console.warn('Icon render failed',error); } }
 const uid = prefix => `${prefix}${Date.now()}${Math.random().toString(16).slice(2)}`;
 const monthNames = {ar:['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'],en:['January','February','March','April','May','June','July','August','September','October','November','December']};
 const monthNamesByNumber = monthNames.ar;
@@ -150,19 +182,33 @@ const configReady = /^https:\/\/.+\.supabase\.co$/.test(config.SUPABASE_URL||'')
 const cloud = configReady ? window.supabase.createClient(config.SUPABASE_URL, config.SUPABASE_PUBLISHABLE_KEY) : null;
 
 const I18N={
-  ar:{appTitle:'دخل مرن',localSaved:'محفوظ محليًا',sectionTitle:'إدارة الشفتات والمستحقات',sectionSubtitle:'بياناتك محفوظة ومزامنة مع حسابك على السحابة.',addMonth:'+ إضافة شهر',bulkMonth:'إدخال شهر كامل',settings:'⚙ الإعدادات',editMonth:'تعديل الشهر الحالي',deleteMonth:'حذف الشهر الحالي',addShift:'+ إضافة شفت',dueKpi:'المستحقات غير المستلمة',currentKpi:'مستحق الشهر الحالي',hoursKpi:'ساعات الشهر الحالي',payKpi:'راتب مرن القادم',hoursMinutes:'ساعات ودقائق',summaryEyebrow:'ملخص مرن',summaryTitle:'المستحقات حسب الشهر',currency:'ر.س',day:'يوم',noMonths:'لا توجد شهور بعد.',noMonth:'لا يوجد شهر',addMonthStart:'أضف شهرًا جديدًا للبدء.',shifts:'شفتات',shift:'شفت',due:'المستحق',received:'المستلم',difference:'الفرق',rating:'التقييم',remaining:'المتبقي في المستحقات',recordReceived:'تسجيل مبلغ الاستلام',cancelReceived:'إلغاء حالة تم الاستلام',markReceived:'✅ تم الاستلام',full:'كامل',short:'ناقص',extra:'زايد',date:'التاريخ',hours:'عدد الساعات',overtime:'الإضافي بعد 5 ساعات',hourRate:'سعر الساعة',shiftAmount:'مبلغ الشفت',edit:'تعديل',delete:'حذف',noShifts:'لا توجد شفتات في هذا الشهر.'},
-  en:{appTitle:'Marn Income',localSaved:'Saved locally',sectionTitle:'Shifts & Payments Management',sectionSubtitle:'Your data is securely saved and synced with your cloud account.',addMonth:'+ Add Month',bulkMonth:'Enter Full Month',settings:'⚙ Settings',editMonth:'Edit Current Month',deleteMonth:'Delete Current Month',addShift:'+ Add Shift',dueKpi:'Unreceived Dues',currentKpi:'Current Month Due',hoursKpi:'Current Month Hours',payKpi:'Next Marn Pay',hoursMinutes:'Hours & Minutes',summaryEyebrow:'Marn Summary',summaryTitle:'Dues by Month',currency:'SAR',day:'days',noMonths:'No months yet.',noMonth:'No month selected',addMonthStart:'Add a new month to start.',shifts:'Shifts',shift:'shift',due:'Due',received:'Received',difference:'Difference',rating:'Status',remaining:'Remaining Due',recordReceived:'Record Received Amount',cancelReceived:'Undo Received Status',markReceived:'✅ Mark as Received',full:'Full',short:'Short',extra:'Extra',date:'Date',hours:'Hours',overtime:'Overtime after 5 hours',hourRate:'Hourly Rate',shiftAmount:'Shift Amount',edit:'Edit',delete:'Delete',noShifts:'No shifts in this month.'}
+  ar:{appTitle:'حاسبة الراتب بالساعات',localSaved:'محفوظ محليًا',sectionTitle:'إدارة الشفتات والمستحقات',sectionSubtitle:'تابع ساعات عملك وتأكد من راتبك كامل',addMonth:'+ إضافة شهر',bulkMonth:'إدخال شهر كامل',settings:'⚙ الإعدادات',editMonth:'تعديل الشهر الحالي',deleteMonth:'حذف الشهر الحالي',addShift:'+ إضافة شفت',dueKpi:'المستحقات غير المستلمة',currentKpi:'مستحق الشهر الحالي',hoursKpi:'ساعات الشهر الحالي',payKpi:'عدد الشفتات',hoursMinutes:'ساعات ودقائق',summaryEyebrow:'ملخص مرن',summaryTitle:'المستحقات حسب الشهر',currency:'ر.س',day:'يوم',noMonths:'لا توجد شهور بعد.',noMonth:'لا يوجد شهر',addMonthStart:'أضف شهرًا جديدًا للبدء.',shifts:'شفتات',shift:'شفت',due:'المستحق',received:'المستلم',difference:'الفرق',rating:'التقييم',remaining:'المتبقي في المستحقات',recordReceived:'تسجيل مبلغ الاستلام',cancelReceived:'إلغاء حالة تم الاستلام',markReceived:'✅ تم الاستلام',full:'كامل',short:'ناقص',extra:'زايد',date:'التاريخ',hours:'عدد الساعات',overtime:'الإضافي بعد 5 ساعات',hourRate:'سعر الساعة',shiftAmount:'مبلغ الشفت',edit:'تعديل',delete:'حذف',noShifts:'لا توجد شفتات في هذا الشهر.'},
+  en:{appTitle:'Hourly Salary Calculator',localSaved:'Saved locally',sectionTitle:'Shifts & Payments Management',sectionSubtitle:'Track your work hours and make sure your salary is complete.',addMonth:'+ Add Month',bulkMonth:'Enter Full Month',settings:'⚙ Settings',editMonth:'Edit Current Month',deleteMonth:'Delete Current Month',addShift:'+ Add Shift',dueKpi:'Unreceived Dues',currentKpi:'Current Month Due',hoursKpi:'Current Month Hours',payKpi:'Shift Count',hoursMinutes:'Hours & Minutes',summaryEyebrow:'Marn Summary',summaryTitle:'Dues by Month',currency:'SAR',day:'days',noMonths:'No months yet.',noMonth:'No month selected',addMonthStart:'Add a new month to start.',shifts:'Shifts',shift:'shift',due:'Due',received:'Received',difference:'Difference',rating:'Status',remaining:'Remaining Due',recordReceived:'Record Received Amount',cancelReceived:'Undo Received Status',markReceived:'✅ Mark as Received',full:'Full',short:'Short',extra:'Extra',date:'Date',hours:'Hours',overtime:'Overtime after 5 hours',hourRate:'Hourly Rate',shiftAmount:'Shift Amount',edit:'Edit',delete:'Delete',noShifts:'No shifts in this month.'}
 };
 function t(key){ return I18N[currentLanguage]?.[key] ?? I18N.ar[key] ?? key; }
 function l(ar,en){ return currentLanguage==='ar'?ar:en; }
 function applyLanguage(){
   document.documentElement.lang=currentLanguage;
   document.documentElement.dir=currentLanguage==='ar'?'rtl':'ltr';
-  const map={appTitle:'appTitle',localSavedText:'localSaved',sectionTitle:'sectionTitle',sectionSubtitle:'sectionSubtitle',addMonthBtn:'addMonth',bulkMonthBtn:'bulkMonth',settingsBtn:'settings',editMonthBtn:'editMonth',deleteMonthBtn:'deleteMonth',addShiftBtn:'addShift',kpiDueLabel:'dueKpi',kpiCurrentLabel:'currentKpi',kpiHoursLabel:'hoursKpi',kpiPayLabel:'payKpi',hoursMinutesLabel:'hoursMinutes',summaryEyebrow:'summaryEyebrow',summaryTitle:'summaryTitle'};
-  Object.entries(map).forEach(([id,key])=>{ const el=document.getElementById(id); if(el) el.textContent=t(key); });
-  document.querySelectorAll('.currencyLabel').forEach(el=>el.textContent=t('currency'));
-  $('#todayText').textContent=new Intl.DateTimeFormat(currentLanguage==='ar'?'ar-SA':'en-US',{dateStyle:'full'}).format(new Date());
+  const text={
+    ar:{today:'اليوم',language:'العربية',due:'المستحقات غير المستلمة',hours:'إجمالي الساعات',expected:'إجمالي مستحقات الشهر',shifts:'عدد الشفتات',hourUnit:'ساعة',shiftUnit:'شفت',quickTitle:'إضافة شفت / مهمة جديدة',date:'التاريخ',hoursField:'ساعات',minutes:'دقائق',rate:'سعر الساعة',expectedField:'المبلغ المتوقع',add:'إضافة',deleteMonth:'حذف الشهر',edit:'تعديل',fullMonth:'شهر كامل',addShift:'إضافة شفت',addMonth:'إضافة شهر',overview:'نظرة عامة على الشهر',details:'تفاصيل الشفتات'},
+    en:{today:'Today',language:'English',due:'Unreceived dues',hours:'Total hours',expected:'Month total due',shifts:'Shift count',hourUnit:'hours',shiftUnit:'shifts',quickTitle:'Add a new shift / task',date:'Date',hoursField:'Hours',minutes:'Minutes',rate:'Hourly rate',expectedField:'Expected amount',add:'Add',deleteMonth:'Delete month',edit:'Edit',fullMonth:'Full month',addShift:'Add shift',addMonth:'Add month',overview:'Month overview',details:'Shift details'}
+  }[currentLanguage];
+  const set=(id,value)=>{ const el=document.getElementById(id); if(el) el.textContent=value; };
+  set('appTitle',t('appTitle')); set('sectionSubtitle',t('sectionSubtitle')); set('todayLabel',text.today); set('languageBtnText',text.language);
+  set('kpiDueLabel',text.due); set('kpiHoursLabel',text.hours); set('kpiCurrentLabel',text.expected); set('kpiPayLabel',text.shifts);
+  set('hoursMinutesLabel',text.hourUnit); set('quickTitle',text.quickTitle); set('quickDateLabel',text.date); set('quickHoursLabel',text.hoursField); set('quickMinutesLabel',text.minutes); set('quickRateLabel',text.rate); set('quickExpectedLabel',text.expectedField); set('quickAddText',text.add);
+  set('deleteMonthText',text.deleteMonth); set('editMonthText',text.edit); set('bulkMonthText',text.fullMonth); set('addShiftText',text.addShift); set('addMonthText',text.addMonth); set('overviewTitle',text.overview);
+  document.querySelectorAll('.currencyLabel').forEach(el=>el.textContent='SAR');
+  const today=new Date();
+  const locale=currentLanguage==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-US';
+  set('todayDate',new Intl.DateTimeFormat(locale,{day:'2-digit',month:'long',year:'numeric'}).format(today));
+  set('todayText',new Intl.DateTimeFormat(locale,{weekday:'long'}).format(today));
+  set('footerYear',String(today.getFullYear()));
+  updateAccountMenu();
+  updateThemeIcon();
   if(document.getElementById('authScreen')) applyAuthLanguage?.();
+  refreshIcons();
 }
 function clone(value){ return JSON.parse(JSON.stringify(value)); }
 function durationHours(value){
@@ -280,8 +326,8 @@ function durationLabel(decimalHours){
   if(d.hours) return `${d.hours} س`;
   return `${d.minutes} د`;
 }
-function fmtMoney(value){ return new Intl.NumberFormat(currentLanguage==='ar'?'ar-SA':'en-US',{maximumFractionDigits:2}).format(Number(value||0)); }
-function fmtDate(date){ return new Intl.DateTimeFormat(currentLanguage==='ar'?'ar-SA':'en-US',{dateStyle:'medium'}).format(new Date(`${date}T12:00:00`)); }
+function fmtMoney(value){ return new Intl.NumberFormat(currentLanguage==='ar'?'ar-SA-u-nu-latn':'en-US',{minimumFractionDigits:2,maximumFractionDigits:2}).format(Number(value||0)); }
+function fmtDate(date){ return new Intl.DateTimeFormat(currentLanguage==='ar'?'ar-SA-u-ca-gregory-nu-latn':'en-GB',{day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date(`${date}T12:00:00`)); }
 function escapeHtml(value=''){ return String(value).replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
 function nextMarnPayDate(){
   const now=new Date();
@@ -309,82 +355,145 @@ function table(headers,rows){
   return `<div class="table-wrap"><table><thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>${rows.join('')}</tbody></table></div>`;
 }
 function shiftActions(id){
-  return `<div class="row-actions"><button class="mini-btn" data-edit-shift="${id}">${t('edit')}</button><button class="mini-btn" data-delete-shift="${id}">${t('delete')}</button></div>`;
+  return `<div class="row-actions"><button class="mini-btn icon-only" type="button" title="${t('edit')}" data-edit-shift="${id}"><i data-lucide="pencil"></i></button><button class="mini-btn icon-only danger-text" type="button" title="${t('delete')}" data-delete-shift="${id}"><i data-lucide="trash-2"></i></button></div>`;
 }
 
+function sortedMonthEntries(){
+  return Object.entries(state.months||{}).sort((a,b)=>monthKeyFor(a[0],a[1]).localeCompare(monthKeyFor(b[0],b[1])));
+}
+function defaultQuickDate(){
+  const month=state.months[activeMonth];
+  if(!month) return '';
+  const key=monthKeyFor(activeMonth,month);
+  const today=new Date();
+  const todayKey=`${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}`;
+  if(todayKey===key) return `${key}-${String(today.getDate()).padStart(2,'0')}`;
+  const used=new Set((month.shifts||[]).map(x=>x.date));
+  const days=new Date(Number(key.slice(0,4)),Number(key.slice(5,7)),0).getDate();
+  for(let day=1;day<=days;day++){
+    const date=`${key}-${String(day).padStart(2,'0')}`;
+    if(!used.has(date)) return date;
+  }
+  return `${key}-01`;
+}
+function updateQuickExpected(){
+  const hours=Math.max(0,Number($('#quickHours')?.value||0));
+  const minutes=Math.max(0,Math.min(59,Number($('#quickMinutes')?.value||0)));
+  const rate=Math.max(0,Number($('#quickRate')?.value||0));
+  if($('#quickExpected')) $('#quickExpected').textContent=fmtMoney((hours+minutes/60)*rate);
+}
+function renderCalendar(month){
+  const container=$('#monthCalendar');
+  if(!container) return;
+  const weekdays=currentLanguage==='ar'?['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت']:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if(!month){ container.innerHTML=`<div class="empty-state" style="grid-column:1/-1">${t('addMonthStart')}</div>`; return; }
+  const key=monthKeyFor(activeMonth,month);
+  const [year,monthNumber]=key.split('-').map(Number);
+  const daysInMonth=new Date(year,monthNumber,0).getDate();
+  const firstDay=new Date(year,monthNumber-1,1).getDay();
+  const shiftsByDate={};
+  (month.shifts||[]).forEach(shift=>{ (shiftsByDate[shift.date]??=[]).push(shift); });
+  const selected=$('#quickDate')?.value;
+  const cells=weekdays.map(day=>`<div class="calendar-weekday">${day}</div>`);
+  for(let i=0;i<firstDay;i++) cells.push('<div class="calendar-day outside"></div>');
+  for(let day=1;day<=daysInMonth;day++){
+    const date=`${key}-${String(day).padStart(2,'0')}`;
+    const shifts=shiftsByDate[date]||[];
+    const totalHours=shifts.reduce((sum,x)=>sum+Number(x.hours||0),0);
+    const weekday=new Date(year,monthNumber-1,day).getDay();
+    const weekend=weekday===5||weekday===6;
+    const note=shifts.length?(shifts.length>1?`${shifts.length} ${t('shift')}`:''):(weekend?l('إجازة','Off'):'');
+    cells.push(`<button class="calendar-day ${weekend?'weekend':''} ${shifts.length?'has-shift':''} ${selected===date?'selected':''}" type="button" data-calendar-date="${date}" ${shifts[0]?`data-calendar-shift="${shifts[0].id}"`:''}><span class="day-number">${day}</span>${shifts.length?`<span class="day-hours">${durationLabel(totalHours)}</span>`:''}${note?`<span class="day-note">${note}</span>`:''}</button>`);
+  }
+  const totalCells=firstDay+daysInMonth;
+  const trailing=(7-(totalCells%7))%7;
+  for(let i=0;i<trailing;i++) cells.push('<div class="calendar-day outside"></div>');
+  container.innerHTML=cells.join('');
+}
+function renderOverview(month){
+  const target=$('#monthOverview');
+  if(!target) return;
+  if(!month){ target.innerHTML=`<div class="empty-state">${t('noMonth')}</div>`; return; }
+  const hours=(month.shifts||[]).reduce((sum,x)=>sum+Number(x.hours||0),0);
+  const total=monthExpected(month),received=Number(month.receivedAmount||0),diff=received-total;
+  const rows=[
+    ['clock-3',l('إجمالي الساعات','Total hours'),`${durationLabel(hours)}`,''],
+    ['calendar-check-2',l('عدد الشفتات','Shift count'),`${month.shifts.length} ${t('shift')}`,''],
+    ['wallet',l('إجمالي المستحقات','Total due'),`${fmtMoney(total)} SAR`,''],
+    ['credit-card',l('المبلغ المستلم','Received amount'),`${fmtMoney(received)} SAR`,''],
+    ['circle-arrow-down',l('الفرق','Difference'),`${diff>0?'+ ':''}${fmtMoney(diff)} SAR`,diff<0?'negative':diff>0?'positive':'']
+  ];
+  target.innerHTML=rows.map(([icon,label,value,cls])=>`<div class="overview-row"><div class="overview-label"><i data-lucide="${icon}"></i><span>${label}</span></div><div class="overview-value ${cls}">${value}</div></div>`).join('');
+}
+function renderSettlement(month){
+  const target=$('#monthSettlement');
+  if(!target) return;
+  if(!month){ target.innerHTML=''; return; }
+  const total=monthExpected(month),received=Number(month.receivedAmount||0),hours=(month.shifts||[]).reduce((s,x)=>s+Number(x.hours||0),0),diff=received-total;
+  const status=monthStatus(month);
+  target.innerHTML=`<div class="settlement-strip">
+    <div class="settlement-box"><div class="receive-row"><label class="field"><span>${l('المبلغ المستلم (SAR)','Received amount (SAR)')}</span><input id="inlineReceivedAmount" type="number" min="0" step="0.01" value="${received}"></label><button class="${month.received?'secondary-btn':'primary-btn'}" id="inlineSettleBtn" type="button">${month.received?l('تم الاستلام','Received'):l('تأكيد الاستلام','Confirm')}</button></div></div>
+    <div class="settlement-box settlement-main"><span>${l('الفرق بين المستحق والمستلم','Difference between due and received')}</span><strong class="${diff<0?'negative':'positive'}">${diff>0?'+ ':''}${fmtMoney(diff)}</strong><small>SAR</small><div class="settlement-state">${status.label}</div></div>
+    <div class="settlement-box"><span>${l('إجمالي الساعات','Total hours')}</span><strong>${durationLabel(hours)}</strong></div>
+    <div class="settlement-box"><span>${l('عدد الشفتات','Shift count')}</span><strong>${month.shifts.length}</strong></div>
+  </div>`;
+  $('#inlineSettleBtn').onclick=()=>{
+    month.receivedAmount=Math.max(0,Number($('#inlineReceivedAmount').value||0));
+    month.received=!month.received;
+    if(month.received&&!month.receivedAmount) month.receivedAmount=total;
+    saveState(); render(); toast(month.received?l('تم تسجيل استلام الراتب','Payment marked as received'):l('تم إلغاء حالة الاستلام','Received status removed'));
+  };
+}
 function render(){
+  if(!activeMonth||!state.months[activeMonth]) activeMonth=getLatestMonthName();
   const totals=marnTotals();
   const totalDue=totals.reduce((sum,x)=>sum+x.due,0);
   const month=state.months[activeMonth];
   const currentExpected=month?monthExpected(month):0;
   const currentHours=month?(month.shifts||[]).reduce((sum,x)=>sum+Number(x.hours||0),0):0;
-  const nextPay=nextMarnPayDate();
+  const shiftCount=month?.shifts?.length||0;
 
   $('#marnOnlyDueKpi').textContent=fmtMoney(totalDue);
   $('#marnCurrentExpectedKpi').textContent=fmtMoney(currentExpected);
-  $('#marnCurrentHoursKpi').textContent=durationLabel(currentHours);
-  $('#marnNextPayKpi').textContent=`${daysUntil(nextPay)} ${t('day')}`;
-  $('#marnNextPaySub').textContent=new Intl.DateTimeFormat(currentLanguage==='ar'?'ar-SA':'en-US',{dateStyle:'medium'}).format(nextPay);
+  $('#marnCurrentHoursKpi').textContent=fmtMoney(currentHours).replace(/\.00$/,'');
+  $('#marnNextPayKpi').textContent=String(shiftCount);
+  $('#marnNextPaySub').textContent=t('shift');
+  $('#dueStatus').textContent=totalDue>0?t('short'):t('full');
+  $('#currentMonthLabel').textContent=month?monthDisplayName(activeMonth,month):t('noMonth');
 
-  const bars=$('#marnOnlyBars');
-  if(!totals.length){
-    bars.innerHTML=`<div class="empty-state" style="width:100%">${t('noMonths')}</div>`;
-  }else{
-    const max=Math.max(...totals.map(x=>x.total),1);
-    bars.innerHTML=totals.map(x=>`<div class="bar-item"><div class="bar-value">${fmtMoney(x.total)}</div><div class="bar-track"><div class="bar-fill" style="height:${Math.max(6,(x.total/max)*100)}%"></div></div><span>${escapeHtml(x.label)}</span></div>`).join('');
-  }
-
-  $('#monthTabs').innerHTML=Object.entries(state.months)
-    .sort((a,b)=>monthKeyFor(a[0],a[1]).localeCompare(monthKeyFor(b[0],b[1])))
-    .map(([name,m])=>`<button class="month-tab ${name===activeMonth?'active':''}" data-month="${escapeHtml(name)}">${escapeHtml(monthDisplayName(name,m))}</button>`).join('');
+  $('#monthTabs').innerHTML=sortedMonthEntries().map(([name,m])=>`<button data-month="${escapeHtml(name)}">${escapeHtml(monthDisplayName(name,m))}</button>`).join('');
 
   if(!month){
-    $('#activeMonthTitle').textContent=t('noMonth');
-    $('#monthSummary').innerHTML='';
-    $('#monthSettlement').innerHTML=`<div class="empty-state">${t('addMonthStart')}</div>`;
-    $('#shiftsTable').innerHTML='';
-    return;
+    $('#activeMonthTitle').textContent=l('تفاصيل الشفتات','Shift details');
+    $('#monthSummary').textContent=t('addMonthStart');
+    $('#shiftsTable').innerHTML=`<div class="empty-state">${t('addMonthStart')}</div>`;
+    renderCalendar(null); renderOverview(null); renderSettlement(null);
+    $('#quickDate').value='';
+    refreshIcons(); return;
   }
 
-  $('#activeMonthTitle').textContent=`${t('shifts')} ${monthDisplayName(activeMonth,month)}`;
-  const hours=(month.shifts||[]).reduce((sum,x)=>sum+Number(x.hours||0),0);
-  const total=monthExpected(month);
-  const due=monthDue(month);
-  const status=monthStatus(month);
-  const diff=Number(month.receivedAmount||0)-total;
-  $('#monthSummary').innerHTML=`<span>${month.shifts.length} شفت</span><span>${durationLabel(hours)}</span><span>${fmtMoney(total)} ${t('currency')}</span>`;
+  const key=monthKeyFor(activeMonth,month);
+  if(!$('#quickDate').value||!$('#quickDate').value.startsWith(key)) $('#quickDate').value=defaultQuickDate();
+  if(document.activeElement!==$('#quickRate')) $('#quickRate').value=Number(month.rate||25);
+  updateQuickExpected();
 
-  $('#monthSettlement').innerHTML=`
-    <div class="settlement-grid">
-      <div><span>${t('due')}</span><strong>${fmtMoney(total)} ${t('currency')}</strong></div>
-      <div><span>${t('received')}</span><strong>${fmtMoney(month.receivedAmount||0)} ${t('currency')}</strong></div>
-      <div><span>${t('difference')}</span><strong class="${diff<0?'negative':'positive'}">${fmtMoney(diff)} ${t('currency')}</strong></div>
-      <div><span>${t('rating')}</span>${statusBadge(status.label,status.cls)}</div>
-      <div><span>${t('remaining')}</span><strong>${fmtMoney(due)} ${t('currency')}</strong></div>
-    </div>
-    <div class="form-actions">
-      <button class="primary-btn" id="settleMonthBtn">${t('recordReceived')}</button>
-      <button class="secondary-btn" id="toggleMonthReceivedBtn">${month.received?t('cancelReceived'):t('markReceived')}</button>
-    </div>`;
+  $('#activeMonthTitle').textContent=l('تفاصيل الشفتات','Shift details');
+  $('#monthSummary').textContent=`${monthDisplayName(activeMonth,month)} • ${shiftCount} ${t('shift')} • ${durationLabel(currentHours)}`;
+  renderCalendar(month); renderOverview(month);
 
-  $('#settleMonthBtn').onclick=()=>openSettlementForm();
-  $('#toggleMonthReceivedBtn').onclick=()=>{
-    month.received=!month.received;
-    if(month.received&&!Number(month.receivedAmount||0)) month.receivedAmount=total;
-    saveState(); render(); toast(month.received?'تم إخراج الشهر من إجمالي المستحقات':'عاد الشهر إلى المستحقات');
-  };
-
-  const rows=(month.shifts||[]).map(shift=>`<tr>
-    <td>${fmtDate(shift.date)}</td>
+  const rows=[...(month.shifts||[])].sort((a,b)=>b.date.localeCompare(a.date)).map(shift=>`<tr>
+    <td><span class="shift-dot"></span>${fmtDate(shift.date)}</td>
     <td>${durationLabel(shift.hours)}</td>
+    <td>${fmtMoney(shift.rate)} SAR</td>
+    <td class="amount positive">${fmtMoney(shiftTotal(shift))} SAR</td>
     <td>${durationLabel(Math.max(0,Number(shift.hours)-5))}</td>
-    <td>${fmtMoney(shift.rate)} ${t('currency')}/${currentLanguage==='ar'?'ساعة':'hr'}</td>
-    <td class="amount positive">${fmtMoney(shiftTotal(shift))}</td>
     <td>${shiftActions(shift.id)}</td>
   </tr>`);
-  $('#shiftsTable').innerHTML=rows.length?table([t('date'),t('hours'),t('overtime'),t('hourRate'),t('shiftAmount'),''],rows):`<div class="empty-state">${t('noShifts')}</div>`;
+  $('#shiftsTable').innerHTML=rows.length?table([t('date'),t('hours'),t('hourRate'),t('shiftAmount'),t('overtime'),''],rows):`<div class="empty-state">${t('noShifts')}</div>`;
+  renderSettlement(month);
+  updateMonthNavState();
+  refreshIcons();
 }
-
 function openModal(html){ const modal=$('#modalBackdrop .modal'); modal.classList.toggle('modal-wide',html.includes('bulk-month-form')); $('#modalContent').innerHTML=html; $('#modalBackdrop').hidden=false; }
 function closeModal(){ $('#modalBackdrop').hidden=true; $('#modalBackdrop .modal').classList.remove('modal-wide'); $('#modalContent').innerHTML=''; }
 function toast(message){ const el=$('#toast'); el.textContent=message; el.classList.add('show'); clearTimeout(toast.timer); toast.timer=setTimeout(()=>el.classList.remove('show'),2600); }
@@ -657,54 +766,101 @@ async function importJsonBackup(file){
   }
 }
 
+const PALETTES=['emerald','purple'];
+function currentPalette(){ return document.documentElement.dataset.palette||'emerald'; }
+function setPalette(palette){
+  const value=PALETTES.includes(palette)?palette:'emerald';
+  document.documentElement.dataset.palette=value;
+  try{localStorage.setItem(PALETTE_KEY,value);}catch(error){}
+  refreshIcons();
+}
+function setTheme(theme){
+  const value=theme==='light'?'light':'dark';
+  document.documentElement.dataset.theme=value;
+  try{localStorage.setItem(THEME_KEY,value);}catch(error){}
+  updateThemeIcon();
+}
+function updateThemeIcon(){
+  const btn=$('#themeBtn'); if(!btn)return;
+  const dark=document.documentElement.dataset.theme==='dark';
+  btn.innerHTML=`<i data-lucide="${dark?'sun':'moon-star'}"></i>`;
+  btn.title=dark?l('تفعيل الوضع الفاتح','Use light mode'):l('تفعيل الوضع الداكن','Use dark mode');
+  refreshIcons();
+}
+function updateAccountMenu(){
+  const name=currentUser?.user_metadata?.full_name||l('مستخدم CALREN','CALREN User');
+  const email=currentUser?.email||'';
+  if($('#menuProfileName')) $('#menuProfileName').textContent=name;
+  if($('#menuProfileEmail')) $('#menuProfileEmail').textContent=email;
+  if($('#menuAvatar')) $('#menuAvatar').textContent=(name.trim()[0]||'C').toUpperCase();
+  const labels={menuExportBtn:l('تحميل ملف (JSON)','Download JSON'),menuImportBtn:l('إضافة ملف (JSON)','Import JSON'),menuResetBtn:l('إعادة جميع البيانات','Reset all data'),menuLanguageBtn:l('اللغة / Language','Language / اللغة'),menuLogoutBtn:l('تسجيل خروج','Sign out')};
+  Object.entries(labels).forEach(([id,label])=>{ const span=document.querySelector(`#${id} span`); if(span) span.textContent=label; });
+}
+function toggleAccountMenu(force){
+  const menu=$('#accountMenu'); if(!menu)return;
+  const open=typeof force==='boolean'?force:menu.classList.contains('hidden');
+  menu.classList.toggle('hidden',!open); $('#accountBtn')?.setAttribute('aria-expanded',String(open));
+  if(open) updateAccountMenu();
+}
+function moveActiveMonth(direction){
+  const entries=sortedMonthEntries(); if(!entries.length)return;
+  const index=Math.max(0,entries.findIndex(([name])=>name===activeMonth));
+  const next=Math.min(entries.length-1,Math.max(0,index+direction));
+  activeMonth=entries[next][0]; render();
+}
+function updateMonthNavState(){
+  const entries=sortedMonthEntries(); const index=entries.findIndex(([name])=>name===activeMonth);
+  if($('#prevMonthBtn')) $('#prevMonthBtn').disabled=index<=0;
+  if($('#nextMonthBtn')) $('#nextMonthBtn').disabled=index<0||index>=entries.length-1;
+}
+function addQuickShift(){
+  const month=state.months[activeMonth];
+  if(!month){ toast(l('أضف شهرًا أولًا','Add a month first')); openAddMonthForm(); return; }
+  const date=$('#quickDate').value;
+  const hours=Number($('#quickHours').value||0),minutes=Number($('#quickMinutes').value||0),rate=Number($('#quickRate').value||0);
+  if(!date||!Number.isInteger(hours)||hours<0||hours>24||!Number.isInteger(minutes)||minutes<0||minutes>59||rate<0){ toast(l('تحقق من بيانات الشفت','Check the shift details')); return; }
+  const key=monthKeyFor(activeMonth,month);
+  if(!date.startsWith(key)){ toast(l('اختر تاريخًا من الشهر الحالي','Choose a date in the active month')); return; }
+  month.rate=rate;
+  month.shifts.push({id:uid('s'),date,hours:hours+minutes/60,rate});
+  month.shifts.sort((a,b)=>a.date.localeCompare(b.date));
+  saveState(); render(); toast(l('تمت إضافة الشفت ومزامنته','Shift added and synced'));
+}
 function openSettings(){
+  const dark=document.documentElement.dataset.theme==='dark';
+  const palette=currentPalette();
   openModal(`<div class="form" id="settingsPanel">
-    <h2>${currentLanguage==='ar'?'الإعدادات':'Settings'}</h2>
-    <p>${currentLanguage==='ar'?'إدارة اللغة والنسخ الاحتياطي وبيانات التطبيق.':'Manage language, backups, and app data.'}</p>
-    <div class="panel" style="padding:16px">
-      <h3>${currentLanguage==='ar'?'اللغة':'Language'}</h3>
-      <div class="form-actions" style="justify-content:flex-start">
-        <button class="${currentLanguage==='ar'?'primary-btn':'secondary-btn'}" type="button" id="langArBtn">العربية</button>
-        <button class="${currentLanguage==='en'?'primary-btn':'secondary-btn'}" type="button" id="langEnBtn">English</button>
-      </div>
+    <h2>${l('الإعدادات','Settings')}</h2>
+    <p>${l('غيّر اللون والوضع واللغة دون التأثير على بياناتك أو قاعدة البيانات.','Change color, appearance, and language without affecting your data or database.')}</p>
+    <div class="settings-grid">
+      <div class="setting-card"><h3>${l('لون الواجهة','Interface color')}</h3><p>${l('اختر بين الأخضر الزمردي والبنفسجي.','Choose emerald green or purple.')}</p><div class="choice-row"><button class="choice-btn ${palette==='emerald'?'active':''}" id="paletteEmeraldBtn" type="button"><span class="palette-swatch emerald"></span>${l('زمردي','Emerald')}</button><button class="choice-btn ${palette==='purple'?'active':''}" id="palettePurpleBtn" type="button"><span class="palette-swatch purple"></span>${l('بنفسجي','Purple')}</button></div></div>
+      <div class="setting-card"><h3>${l('المظهر','Appearance')}</h3><p>${l('اختر الوضع الداكن أو الفاتح.','Choose dark or light mode.')}</p><div class="choice-row"><button class="choice-btn ${dark?'active':''}" id="darkModeBtn" type="button">${l('داكن','Dark')}</button><button class="choice-btn ${!dark?'active':''}" id="lightModeBtn" type="button">${l('فاتح','Light')}</button></div></div>
+      <div class="setting-card"><h3>${l('اللغة','Language')}</h3><p>${l('العربية أو الإنجليزية مع دعم RTL و LTR.','Arabic or English with RTL and LTR support.')}</p><div class="choice-row"><button class="choice-btn ${currentLanguage==='ar'?'active':''}" id="langArBtn" type="button">العربية</button><button class="choice-btn ${currentLanguage==='en'?'active':''}" id="langEnBtn" type="button">English</button></div></div>
+      <div class="setting-card"><h3>${l('النسخ الاحتياطي','Backup')}</h3><p>${l('صدّر أو استورد ملف JSON لبياناتك.','Export or import your JSON data.')}</p><div class="choice-row"><button class="choice-btn" id="settingsExportBtn" type="button">${l('تصدير','Export')}</button><button class="choice-btn" id="settingsImportBtn" type="button">${l('استيراد','Import')}</button></div></div>
+      <div class="setting-card"><h3>${l('الحساب','Account')}</h3><p><strong>${escapeHtml(currentUser?.user_metadata?.full_name||l('مستخدم CALREN','CALREN User'))}</strong><br><span class="account-line">${escapeHtml(currentUser?.email||'')}</span></p><button class="secondary-btn" type="button" id="logoutBtn">${l('تسجيل الخروج','Sign out')}</button></div>
+      <div class="setting-card" style="border-color:color-mix(in srgb,var(--danger) 35%,var(--line))"><h3 class="danger-text">${l('إعادة تعيين البيانات','Reset data')}</h3><p>${l('يحذف جميع الشهور والشفتات من حسابك وقاعدة البيانات.','Deletes all months and shifts from your account and database.')}</p><button class="danger-btn" type="button" id="resetDataBtn">${l('إعادة تعيين كل البيانات','Reset all data')}</button></div>
     </div>
-    <div class="panel" style="padding:16px">
-      <h3>${currentLanguage==='ar'?'النسخ الاحتياطي JSON':'JSON Backup'}</h3>
-      <p>${currentLanguage==='ar'?'صدّر نسخة من جميع بياناتك أو استعدها من ملف محفوظ.':'Export all your data or restore it from a saved file.'}</p>
-      <div class="form-actions" style="justify-content:flex-start">
-        <button class="secondary-btn" type="button" id="settingsExportBtn">⬇ ${currentLanguage==='ar'?'تصدير JSON':'Export JSON'}</button>
-        <button class="secondary-btn" type="button" id="settingsImportBtn">⬆ ${currentLanguage==='ar'?'استيراد JSON':'Import JSON'}</button>
-      </div>
-    </div>
-    <div class="panel" style="padding:16px">
-      <h3>${currentLanguage==='ar'?'الحساب':'Account'}</h3>
-      <p><strong>${escapeHtml(currentUser?.user_metadata?.full_name||l('مستخدم مرن','Marn User'))}</strong></p>
-      <p class="account-line">${escapeHtml(currentUser?.email||'')}</p>
-      <div class="form-actions" style="justify-content:flex-start"><button class="secondary-btn" type="button" id="logoutBtn">${currentLanguage==='ar'?'تسجيل الخروج':'Sign out'}</button></div>
-    </div>
-    <div class="panel" style="padding:16px;border-color:var(--danger)">
-      <h3 class="danger-text">${currentLanguage==='ar'?'إعادة تعيين البيانات':'Reset Data'}</h3>
-      <p>${currentLanguage==='ar'?'يحذف جميع الشهور والشفتات وبيانات الاستلام من حسابك وقاعدة البيانات.':'Deletes all months, shifts, and received-payment data from your account and cloud database.'}</p>
-      <button class="danger-btn" type="button" id="resetDataBtn">${currentLanguage==='ar'?'إعادة تعيين كل البيانات':'Reset all data'}</button>
-    </div>
-    <div class="form-actions"><button class="secondary-btn" type="button" id="cancelModal">${currentLanguage==='ar'?'إغلاق':'Close'}</button></div>
+    <div class="form-actions"><button class="secondary-btn" type="button" id="cancelModal">${l('إغلاق','Close')}</button></div>
   </div>`);
   $('#cancelModal').onclick=closeModal;
-  $('#langArBtn').onclick=()=>setLanguage('ar');
-  $('#langEnBtn').onclick=()=>setLanguage('en');
-  $('#settingsExportBtn').onclick=exportJsonBackup;
-  $('#settingsImportBtn').onclick=()=>$('#importDataInput').click();
-  $('#resetDataBtn').onclick=resetAllData;
-  $('#logoutBtn').onclick=signOutUser;
+  $('#paletteEmeraldBtn').onclick=()=>{setPalette('emerald');openSettings();};
+  $('#palettePurpleBtn').onclick=()=>{setPalette('purple');openSettings();};
+  $('#darkModeBtn').onclick=()=>{setTheme('dark');openSettings();};
+  $('#lightModeBtn').onclick=()=>{setTheme('light');openSettings();};
+  $('#langArBtn').onclick=()=>setLanguage('ar'); $('#langEnBtn').onclick=()=>setLanguage('en');
+  $('#settingsExportBtn').onclick=exportJsonBackup; $('#settingsImportBtn').onclick=()=>$('#importDataInput').click();
+  $('#resetDataBtn').onclick=resetAllData; $('#logoutBtn').onclick=signOutUser;
+  refreshIcons();
 }
 function setLanguage(lang){
   currentLanguage=lang==='en'?'en':'ar';
   try{localStorage.setItem(LANGUAGE_KEY,currentLanguage);}catch(e){}
-  applyLanguage(); render(); openSettings();
+  const settingsOpen=Boolean($('#settingsPanel'));
+  applyLanguage(); render(); if(settingsOpen) openSettings();
   toast(currentLanguage==='ar'?'تم تغيير اللغة':'Language changed');
 }
 function resetAllData(){
-  const message=currentLanguage==='ar'?'سيتم حذف جميع بيانات مرن من حسابك وقاعدة البيانات نهائيًا. هل أنت متأكد؟':'All Marn data in your account and cloud database will be permanently deleted. Are you sure?';
+  const message=currentLanguage==='ar'?'سيتم حذف جميع بيانات CALREN من حسابك وقاعدة البيانات نهائيًا. هل أنت متأكد؟':'All CALREN data in your account and cloud database will be permanently deleted. Are you sure?';
   if(!confirm(message)) return;
   const second=currentLanguage==='ar'?'تأكيد أخير: لا يمكن التراجع عن إعادة التعيين. متابعة؟':'Final confirmation: reset cannot be undone. Continue?';
   if(!confirm(second)) return;
@@ -723,11 +879,8 @@ function deleteActiveMonth(){
   saveState(); render(); toast('تم حذف الشهر');
 }
 
-$('#themeBtn').onclick=()=>{
-  const dark=document.documentElement.dataset.theme==='dark';
-  document.documentElement.dataset.theme=dark?'light':'dark';
-  try{ localStorage.setItem(THEME_KEY,dark?'light':'dark'); }catch(error){ console.warn('تعذر حفظ المظهر',error); }
-};
+$('#themeBtn').onclick=()=>setTheme(document.documentElement.dataset.theme==='dark'?'light':'dark');
+$('#languageBtn').onclick=()=>setLanguage(currentLanguage==='ar'?'en':'ar');
 $('#addMonthBtn').onclick=openAddMonthForm;
 $('#bulkMonthBtn').onclick=openBulkMonthForm;
 $('#settingsBtn').onclick=openSettings;
@@ -735,10 +888,33 @@ $('#importDataInput').addEventListener('change',e=>importJsonBackup(e.target.fil
 $('#editMonthBtn').onclick=openEditMonthForm;
 $('#deleteMonthBtn').onclick=deleteActiveMonth;
 $('#addShiftBtn').onclick=()=>openShiftForm();
+$('#quickAddShiftBtn').onclick=addQuickShift;
+$('#quickHours').addEventListener('input',updateQuickExpected); $('#quickMinutes').addEventListener('input',updateQuickExpected); $('#quickRate').addEventListener('input',updateQuickExpected);
+$('#quickDate').addEventListener('change',()=>renderCalendar(state.months[activeMonth]));
+document.querySelectorAll('[data-step-target]').forEach(button=>button.onclick=()=>{
+  const input=document.getElementById(button.dataset.stepTarget); if(!input)return;
+  const min=Number(input.min||0),max=Number(input.max||Infinity),step=Number(button.dataset.step||1);
+  input.value=Math.min(max,Math.max(min,Number(input.value||0)+step)); input.dispatchEvent(new Event('input'));
+});
+$('#prevMonthBtn').onclick=()=>moveActiveMonth(-1); $('#nextMonthBtn').onclick=()=>moveActiveMonth(1);
+$('#accountBtn').onclick=e=>{e.stopPropagation();toggleAccountMenu();};
+$('#menuExportBtn').onclick=()=>{toggleAccountMenu(false);exportJsonBackup();};
+$('#menuImportBtn').onclick=()=>{toggleAccountMenu(false);$('#importDataInput').click();};
+$('#menuResetBtn').onclick=()=>{toggleAccountMenu(false);resetAllData();};
+$('#menuLanguageBtn').onclick=()=>{toggleAccountMenu(false);setLanguage(currentLanguage==='ar'?'en':'ar');};
+$('#menuLogoutBtn').onclick=()=>{toggleAccountMenu(false);signOutUser();};
 $('#modalClose').onclick=closeModal;
 $('#modalBackdrop').onclick=e=>{ if(e.target===e.currentTarget) closeModal(); };
-
 document.addEventListener('click',e=>{
+  if(!e.target.closest('#accountMenu')&&!e.target.closest('#accountBtn')) toggleAccountMenu(false);
+  const calendarCell=e.target.closest('[data-calendar-date]');
+  if(calendarCell){
+    $('#quickDate').value=calendarCell.dataset.calendarDate;
+    const shiftId=calendarCell.dataset.calendarShift;
+    if(shiftId){ const shift=state.months[activeMonth]?.shifts.find(x=>x.id===shiftId); if(shift) openShiftForm(shift); }
+    else { renderCalendar(state.months[activeMonth]); document.querySelector('#quickDate')?.scrollIntoView({behavior:'smooth',block:'center'}); }
+    return;
+  }
   const monthButton=e.target.closest('[data-month]');
   if(monthButton){ activeMonth=monthButton.dataset.month; render(); return; }
   const editButton=e.target.closest('[data-edit-shift]');
@@ -788,7 +964,7 @@ function setAuthMode(mode){
   setAuthMessage('');
 }
 function applyAuthLanguage(){
-  $('#authTitle').textContent=t('appTitle');
+  $('#authTitle').textContent='CALREN';
   $('#authSubtitle').textContent=l('سجّل الدخول للوصول إلى بياناتك من أي جهاز','Sign in to access your data from any device');
   $('#loginTab').textContent=l('تسجيل الدخول','Sign in');
   $('#signupTab').textContent=l('إنشاء حساب','Create account');
@@ -797,6 +973,7 @@ function applyAuthLanguage(){
   $('#passwordLabel').textContent=l('كلمة المرور','Password');
   $('#forgotPasswordBtn').textContent=l('نسيت كلمة المرور','Forgot password');
   setAuthMode(authMode);
+  refreshIcons();
 }
 function showAuth(){
   currentUser=null; state={version:2,months:{}}; activeMonth='';
@@ -833,9 +1010,8 @@ $('#forgotPasswordBtn').onclick=async()=>{
   const {error}=await cloud.auth.resetPasswordForEmail(email,{redirectTo:location.href.split('#')[0]});
   setAuthMessage(error?error.message:l('تم إرسال رابط إعادة التعيين إلى بريدك','Password reset link sent'),'success');
 };
-$('#accountBtn').onclick=openSettings;
-
-try{ document.documentElement.dataset.theme=localStorage.getItem(THEME_KEY)||'light'; }catch(error){ document.documentElement.dataset.theme='light'; }
+try{ document.documentElement.dataset.theme=localStorage.getItem(THEME_KEY)||'dark'; }catch(error){ document.documentElement.dataset.theme='dark'; }
+try{ document.documentElement.dataset.palette=localStorage.getItem(PALETTE_KEY)||'emerald'; }catch(error){ document.documentElement.dataset.palette='emerald'; }
 applyLanguage(); applyAuthLanguage();
 (async()=>{
   if(!configReady){ showAuth(); setAuthMessage(l('الموقع جاهز، لكن يجب وضع رابط Supabase والمفتاح في config.js','The site is ready, but Supabase URL and key must be added to config.js'),'error'); return; }
