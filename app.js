@@ -18,11 +18,86 @@ let saveTimer=null;
 
 function emptyState(){return{version:2,shifts:[],months:{},autoOff:[]}}
 function cacheKey(){return `${LOCAL_PREFIX}${currentUser?.id||'guest'}`}
-function normalize(data){return{version:2,shifts:Array.isArray(data?.shifts)?data.shifts:[],months:data?.months&&typeof data.months==='object'?data.months:{},autoOff:Array.isArray(data?.autoOff)?data.autoOff:[]}}
-function readCache(){try{return normalize(JSON.parse(localStorage.getItem(cacheKey())||'null'))}catch{return emptyState()}}
+function oldUserCacheKey(){return `marn-cloud-cache-${currentUser?.id||'guest'}`}
+function safeParse(value){try{return JSON.parse(value||'null')}catch{return null}}
+function hasUsefulData(data){
+  if(!data||typeof data!=='object')return false;
+  if(Array.isArray(data.shifts)&&data.shifts.length)return true;
+  return Object.values(data.months||{}).some(m=>Array.isArray(m?.shifts)&&m.shifts.length||Number(m?.receivedAmount||m?.received||m?.sent||0)>0);
+}
+function monthKeyFromLegacy(name,month){
+  if(/^\d{4}-\d{2}$/.test(name))return name;
+  const dates=(month?.shifts||[]).map(s=>Array.isArray(s)?'':s?.date).filter(Boolean).sort();
+  if(dates.length)return dates.at(-1).slice(0,7);
+  const nums={january:'01',february:'02',march:'03',april:'04',may:'05',june:'06',july:'07',august:'08',september:'09',october:'10',november:'11',december:'12',يناير:'01',فبراير:'02',مارس:'03',أبريل:'04',ابريل:'04',مايو:'05',يونيو:'06',يوليو:'07',أغسطس:'08',اغسطس:'08',سبتمبر:'09',أكتوبر:'10',اكتوبر:'10',نوفمبر:'11',ديسمبر:'12'};
+  return `2026-${nums[String(name).toLowerCase()]||String(name).match(/\d{1,2}/)?.[0]?.padStart(2,'0')||'01'}`;
+}
+function migrateAny(data){
+  if(!data||typeof data!=='object')return emptyState();
+  if(Array.isArray(data.shifts)){
+    return {version:2,shifts:data.shifts.map(s=>{
+      const total=Number(s.hours||0)+Number(s.minutes||0)/60;
+      return {...s,id:s.id||crypto.randomUUID(),hours:Math.floor(total),minutes:Math.round((total-Math.floor(total))*60),rate:Number(s.rate||s.hourlyRate||0),amount:Number(s.amount??total*Number(s.rate||s.hourlyRate||0))};
+    }),months:data.months&&typeof data.months==='object'?data.months:{},autoOff:Array.isArray(data.autoOff)?data.autoOff:[]};
+  }
+  const out=emptyState();
+  Object.entries(data.months||{}).forEach(([name,month])=>{
+    const mk=monthKeyFromLegacy(name,month);
+    const rateDefault=Number(month?.rate||25);
+    (month?.shifts||[]).forEach(raw=>{
+      let date,total,rate,amount;
+      if(Array.isArray(raw)){
+        const day=Number(raw[0]||1), parts=String(raw[1]||'0').split(':').map(Number);
+        total=(parts[0]||0)+(parts[1]||0)/60; amount=Number(raw[2]||0); rate=total?amount/total:rateDefault;
+        date=`${mk}-${String(day).padStart(2,'0')}`;
+      }else{
+        date=raw.date||`${mk}-${String(raw.day||1).padStart(2,'0')}`;
+        total=Number(raw.hours||0)+Number(raw.minutes||0)/60; rate=Number(raw.rate||raw.hourlyRate||rateDefault); amount=Number(raw.amount??total*rate);
+      }
+      out.shifts.push({id:raw?.id||crypto.randomUUID(),date,hours:Math.floor(total),minutes:Math.round((total-Math.floor(total))*60),rate,amount,start:raw?.start||'—'});
+    });
+    out.months[mk]={received:Number(month?.receivedAmount??month?.sent??0),settled:Boolean(month?.received||month?.settled)};
+  });
+  return out;
+}
+function mergeStates(...states){
+  const result=emptyState(), seen=new Set();
+  states.map(migrateAny).forEach(st=>{
+    st.shifts.forEach(s=>{const sig=`${s.date}|${s.hours}|${s.minutes}|${s.rate}|${s.amount}`;if(!seen.has(sig)){seen.add(sig);result.shifts.push(s)}});
+    Object.entries(st.months||{}).forEach(([k,m])=>{const old=result.months[k]||{};result.months[k]={received:Math.max(Number(old.received||0),Number(m.received||m.receivedAmount||0)),settled:Boolean(old.settled||m.settled||m.received)}});
+    result.autoOff=[...new Set([...result.autoOff,...(st.autoOff||[])])];
+  });
+  return result;
+}
+function normalize(data){return migrateAny(data)}
+function readCache(){
+  const candidates=[safeParse(localStorage.getItem(cacheKey())),safeParse(localStorage.getItem(oldUserCacheKey())),safeParse(localStorage.getItem('marn-dashboard-local-v2')),safeParse(localStorage.getItem('my-finance-data-v2'))].filter(Boolean);
+  const merged=mergeStates(...candidates);
+  return hasUsefulData(merged)?merged:emptyState();
+}
+function backupBeforeMigration(source){
+  try{localStorage.setItem(`calren-pre-migration-backup-${currentUser?.id||'guest'}-${Date.now()}`,JSON.stringify(source))}catch(e){console.warn(e)}
+}
 function writeCache(){localStorage.setItem(cacheKey(),JSON.stringify(state))}
 function setSync(type,text){const dot=$('#syncDot'),label=$('#syncText');if(!dot||!label)return;dot.className=`sync-dot ${type||''}`.trim();label.textContent=text}
-async function loadCloud(){state=readCache();render();if(!cloud||!currentUser)return;setSync('syncing',lang==='ar'?'جارٍ المزامنة...':'Syncing...');const {data,error}=await cloud.from('dashboard_data').select('data').eq('user_id',currentUser.id).maybeSingle();if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الاتصال':'Sync failed');toast(lang==='ar'?'تم عرض آخر نسخة محفوظة محليًا':'Showing the latest local copy');return}if(data?.data)state=normalize(data.data);else await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});writeCache();render();setSync('',lang==='ar'?'تمت المزامنة':'Synced')}
+async function loadCloud(){
+  const local=readCache(); state=local; render();
+  if(!cloud||!currentUser)return;
+  setSync('syncing',lang==='ar'?'جارٍ استرجاع البيانات...':'Restoring data...');
+  const {data,error}=await cloud.from('dashboard_data').select('data').eq('user_id',currentUser.id).maybeSingle();
+  if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الاتصال':'Sync failed');toast(lang==='ar'?'تم عرض آخر نسخة محفوظة محليًا':'Showing the latest local copy');return}
+  const cloudRaw=data?.data||null;
+  if(cloudRaw)backupBeforeMigration(cloudRaw);
+  const cloudState=migrateAny(cloudRaw);
+  state=mergeStates(cloudState,local);
+  writeCache(); render();
+  // لا نرفع حالة فارغة، ونرفع فقط بعد دمج الصيغ القديمة والجديدة.
+  if(hasUsefulData(state)){
+    const {error:saveError}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});
+    if(saveError){console.error(saveError);setSync('error',lang==='ar'?'تعذر حفظ التحويل':'Migration save failed');return}
+  }
+  setSync('',lang==='ar'?'تم استرجاع البيانات':'Data restored');
+}
 function save(){writeCache();if(!cloud||!currentUser)return;clearTimeout(saveTimer);setSync('syncing',lang==='ar'?'جارٍ الحفظ...':'Saving...');saveTimer=setTimeout(async()=>{const {error}=await cloud.from('dashboard_data').upsert({user_id:currentUser.id,data:state},{onConflict:'user_id'});if(error){console.error(error);setSync('error',lang==='ar'?'تعذر الحفظ':'Save failed');toast(lang==='ar'?'تعذر الحفظ في Supabase':'Cloud save failed')}else setSync('',lang==='ar'?'تم الحفظ':'Saved')},300)}
 
 function key(d){return d.toISOString().slice(0,7)}
