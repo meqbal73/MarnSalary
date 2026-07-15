@@ -1,69 +1,116 @@
 <!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#061713"><meta name="description" content="CALREN — حاسبة الراتب بالساعات">
-<title>CALREN | حاسبة الراتب</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#06251f" />
+  <meta name="description" content="CALREN - حاسبة الراتب بالساعات ومتابعة المستحقات" />
+  <title>CALREN | حاسبة الراتب</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
 </head>
 <body>
-<div class="ambient a1"></div><div class="ambient a2"></div>
-<header class="topbar shell">
-  <div class="brand"><div class="logo">C</div><div><h1>CALREN</h1><p data-i18n="tagline">حاسبة الراتب بالساعات</p></div></div>
-  <div class="today"><span data-i18n="today">اليوم</span><strong id="todayDate"></strong><small id="todayDay"></small></div>
-  <div class="top-actions">
-    <button class="icon-btn" id="langBtn" aria-label="اللغة">AR</button>
-    <button class="icon-btn" id="themeBtn" aria-label="المظهر">◐</button>
-    <div class="menu-wrap"><button class="icon-btn" id="settingsBtn" aria-label="الإعدادات">⚙</button>
-      <div class="menu" id="settingsMenu">
-        <button data-action="export">⇩ <span data-i18n="export">تحميل ملف JSON</span></button>
-        <button data-action="import">⇧ <span data-i18n="import">إضافة ملف JSON</span></button>
-        <button data-action="reset">↻ <span data-i18n="reset">إعادة جميع البيانات</span></button>
-        <button data-action="logout" class="danger-text">⇥ <span data-i18n="logout">تسجيل خروج</span></button>
-      </div>
+  <section class="auth-screen" id="authScreen">
+    <div class="auth-card">
+      <div class="auth-brand"><span class="brand-mark">C</span><h1 id="authTitle">CALREN</h1><p id="authSubtitle">سجّل الدخول للوصول إلى بياناتك من أي جهاز</p></div>
+      <div class="auth-tabs"><button class="auth-tab active" id="loginTab" type="button">تسجيل الدخول</button><button class="auth-tab" id="signupTab" type="button">إنشاء حساب</button></div>
+      <form class="auth-form" id="authForm">
+        <label class="hidden" id="nameField"><span id="nameLabel">الاسم</span><input id="authName" type="text" autocomplete="name" minlength="2"></label>
+        <label><span id="emailLabel">البريد الإلكتروني</span><input id="authEmail" type="email" autocomplete="email" required></label>
+        <label><span id="passwordLabel">كلمة المرور</span><input id="authPassword" type="password" minlength="6" autocomplete="current-password" required></label>
+        <button class="primary-btn" id="authSubmitBtn" type="submit">دخول</button>
+        <button class="secondary-btn" id="forgotPasswordBtn" type="button">نسيت كلمة المرور</button>
+        <div class="auth-message" id="authMessage"></div>
+      </form>
     </div>
+  </section>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div class="app-shell hidden" id="appShell">
+    <header class="topbar container">
+      <a class="brand" href="#" aria-label="CALREN"><span class="brand-mark">C</span><span><b>CALREN</b><small data-i18n="brandSub">حاسبة الراتب بالساعات</small></span></a>
+      <div class="today-card"><span data-i18n="today">اليوم</span><strong id="todayDate"></strong><small id="todayDay"></small></div>
+      <div class="header-actions">
+        <div class="sync-pill"><span class="sync-dot" id="syncDot"></span><span id="syncText">متصل</span></div><button class="ghost-btn" id="languageBtn">🌐 <span id="languageLabel">العربية</span></button>
+        <button class="icon-btn" id="settingsBtn" aria-label="الإعدادات">⚙</button>
+      </div>
+    </header>
+
+    <main class="container">
+      <section class="hero-grid" aria-label="ملخص الراتب">
+        <article class="stat-card danger-card"><span data-i18n="unpaid">المستحقات غير المستلمة</span><strong id="unpaidTotal">0.00</strong><small>SAR</small><em id="unpaidStatus">كامل</em></article>
+        <article class="stat-card"><span data-i18n="totalHours">إجمالي الساعات</span><strong id="totalHours">0</strong><small data-i18n="hour">ساعة</small></article>
+        <article class="stat-card featured"><span data-i18n="monthDue">إجمالي مستحقات الشهر</span><strong id="monthDue">0.00</strong><small>SAR</small></article>
+        <article class="stat-card"><span data-i18n="shiftCount">عدد الشفتات</span><strong id="shiftCount">0</strong><small data-i18n="shift">شفت</small></article>
+      </section>
+
+      <section class="quick-panel panel">
+        <div class="panel-title"><div><span class="eyebrow">⚡</span><h2 data-i18n="quickAdd">إضافة شفت / مهمة جديدة</h2></div><p data-i18n="quickHint">أدخل ساعات اليوم وسيُحسب المبلغ مباشرة.</p></div>
+        <form id="shiftForm" class="quick-form">
+          <label><span data-i18n="date">التاريخ</span><input id="shiftDate" type="date" required></label>
+          <label><span data-i18n="hours">الساعات</span><div class="stepper"><button type="button" data-step="hours" data-dir="-1">−</button><input id="shiftHours" type="number" min="0" max="24" value="5"><button type="button" data-step="hours" data-dir="1">+</button></div></label>
+          <label><span data-i18n="minutes">الدقائق</span><div class="stepper"><button type="button" data-step="minutes" data-dir="-15">−</button><input id="shiftMinutes" type="number" min="0" max="59" step="15" value="0"><button type="button" data-step="minutes" data-dir="15">+</button></div></label>
+          <label><span data-i18n="hourlyRate">سعر الساعة</span><div class="money-input"><input id="hourlyRate" type="number" min="0" step="0.25" value="25"><b>SAR</b></div></label>
+          <div class="live-total"><span data-i18n="expectedAmount">المبلغ المتوقع</span><strong id="liveAmount">300.00 SAR</strong></div>
+          <button class="primary-btn" type="submit">＋ <span data-i18n="add">إضافة</span></button>
+          <button class="secondary-btn" id="addMonthBtn" type="button">▣ <span data-i18n="addMonth">إضافة شهر كامل</span></button>
+          <button class="danger-btn" id="deleteMonthBtn" type="button">⌫ <span data-i18n="deleteMonth">حذف الشهر كامل</span></button>
+        </form>
+        <div class="rule-note" id="ruleNote">لن يسمح النظام بأكثر من 6 أيام عمل متتالية، وسيضيف اليوم السابع كإجازة تلقائيًا.</div>
+      </section>
+
+      <section class="calendar-layout">
+        <article class="panel calendar-panel">
+          <div class="calendar-toolbar">
+            <div><span class="eyebrow" data-i18n="calendar">تقويم الشهر</span><h2 id="calendarTitle"></h2></div>
+            <div class="calendar-nav"><button id="prevMonth">‹</button><button id="todayBtn" data-i18n="goToday">اليوم</button><button id="nextMonth">›</button></div>
+          </div>
+          <div class="weekdays" id="weekdays"></div>
+          <div class="calendar-grid" id="calendarGrid"></div>
+          <div class="legend"><span><i class="worked"></i><b data-i18n="workDay">يوم عمل</b></span><span><i class="auto-off"></i><b data-i18n="autoOff">إجازة تلقائية</b></span><span><i class="today-dot"></i><b data-i18n="today">اليوم</b></span></div>
+        </article>
+
+        <aside class="panel overview-card">
+          <span class="eyebrow" data-i18n="monthOverview">نظرة عامة على الشهر</span>
+          <div class="overview-row"><span data-i18n="totalHours">إجمالي الساعات</span><strong id="sideHours">0</strong></div>
+          <div class="overview-row"><span data-i18n="shiftCount">عدد الشفتات</span><strong id="sideShifts">0</strong></div>
+          <div class="overview-row"><span data-i18n="monthDue">إجمالي المستحقات</span><strong id="sideDue">0.00 SAR</strong></div>
+          <div class="overview-row"><span data-i18n="received">المبلغ المستلم</span><strong id="sideReceived">0.00 SAR</strong></div>
+          <div class="overview-row difference"><span data-i18n="difference">الفرق</span><strong id="sideDifference">0.00 SAR</strong><em id="differenceStatus">كامل</em></div>
+        </aside>
+      </section>
+
+      <section class="panel shifts-panel">
+        <div class="table-head"><div><span class="eyebrow" data-i18n="shiftDetails">تفاصيل الشفتات</span><h2 id="tableMonthTitle"></h2></div><button class="ghost-btn" id="exportCsvBtn">⇩ CSV</button></div>
+        <div class="table-wrap"><table><thead><tr><th data-i18n="date">التاريخ</th><th data-i18n="time">الوقت</th><th data-i18n="duration">المدة</th><th data-i18n="hourlyRate">سعر الساعة</th><th data-i18n="amount">المبلغ</th><th data-i18n="actions">الإجراءات</th></tr></thead><tbody id="shiftsBody"></tbody></table></div>
+        <div class="settlement-grid">
+          <label class="received-box"><span data-i18n="receivedAmount">المبلغ المستلم (SAR)</span><input id="receivedAmount" type="number" min="0" step="0.01" placeholder="0.00"></label>
+          <button class="primary-btn" id="settleBtn" type="button">✓ <span data-i18n="markReceived">تم استلام الراتب</span></button>
+          <div class="difference-box"><span data-i18n="difference">الفرق</span><strong id="bottomDifference">0.00 SAR</strong><em id="bottomStatus">كامل</em></div>
+          <div class="mini-summary"><span><b id="bottomHours">0</b><small data-i18n="hour">ساعة</small></span><span><b id="bottomShifts">0</b><small data-i18n="shift">شفت</small></span></div>
+        </div>
+      </section>
+    </main>
+    <footer>CALREN © 2026</footer>
   </div>
-</header>
-<input id="importInput" type="file" accept="application/json,.json" hidden>
-<main class="shell">
-<section class="intro"><div><span class="eyebrow">CALREN</span><h2 data-i18n="welcome">اعرف مستحقاتك بدقة</h2><p data-i18n="description">سجّل ساعات عملك اليومية، وقارن المبلغ المستحق بما استلمته فعليًا.</p></div></section>
-<section class="stats-grid">
-  <article class="stat-card priority"><div class="stat-head"><span data-i18n="unpaid">المستحقات غير المستلمة</span><i>◫</i></div><strong id="unpaidTotal">0.00</strong><small>SAR</small><div id="overallStatus" class="status negative">ناقص</div></article>
-  <article class="stat-card"><div class="stat-head"><span data-i18n="hours">إجمالي الساعات</span><i>◷</i></div><strong id="hoursTotal">0</strong><small data-i18n="hour">ساعة</small></article>
-  <article class="stat-card"><div class="stat-head"><span data-i18n="monthDue">مستحقات الشهر الحالي</span><i>▣</i></div><strong id="monthDue">0.00</strong><small>SAR</small></article>
-  <article class="stat-card"><div class="stat-head"><span data-i18n="shifts">عدد الشفتات</span><i>▤</i></div><strong id="shiftCount">0</strong><small data-i18n="shift">شفت</small></article>
-</section>
-<section class="panel quick-panel">
-  <div class="panel-title"><div><span class="eyebrow" data-i18n="quick">إدخال سريع</span><h3 data-i18n="addShift">إضافة شفت / مهمة</h3></div><span class="bolt">ϟ</span></div>
-  <form id="quickForm" class="quick-form">
-    <label><span data-i18n="date">التاريخ</span><input type="date" id="shiftDate" required></label>
-    <label><span data-i18n="hoursInput">ساعات</span><input type="number" id="shiftHours" min="0" max="23" value="8" required></label>
-    <label><span data-i18n="minutes">دقائق</span><input type="number" id="shiftMinutes" min="0" max="59" value="0" required></label>
-    <label><span data-i18n="hourRate">سعر الساعة</span><input type="number" id="hourRate" min="0" step="0.01" value="37.5" required></label>
-    <div class="preview-amount"><span data-i18n="expected">المبلغ المتوقع</span><strong id="liveAmount">300.00 SAR</strong></div>
-    <button class="primary" type="submit">＋ <span data-i18n="add">إضافة</span></button>
-  </form>
-  <div class="month-actions"><button class="secondary" id="addFullMonth" type="button">＋ <span data-i18n="addMonth">إضافة شهر كامل</span></button><button class="danger-btn" id="deleteFullMonth" type="button">⌫ <span data-i18n="deleteMonth">حذف الشهر كاملًا</span></button></div>
-</section>
-<section class="panel calendar-panel">
-  <div class="calendar-head"><div><span class="eyebrow" data-i18n="calendar">تقويم الشهر</span><h3 id="calendarTitle"></h3></div><div class="calendar-nav"><button id="prevMonth">‹</button><button id="todayMonth" data-i18n="todayBtn">اليوم</button><button id="nextMonth">›</button></div></div>
-  <div class="calendar-layout"><div class="calendar"><div class="weekdays" id="weekdays"></div><div class="days" id="calendarDays"></div></div><aside class="month-overview"><h4 data-i18n="overview">نظرة عامة على الشهر</h4><div><span data-i18n="hours">إجمالي الساعات</span><strong id="asideHours">0</strong></div><div><span data-i18n="shifts">عدد الشفتات</span><strong id="asideShifts">0</strong></div><div><span data-i18n="monthDue">إجمالي المستحقات</span><strong id="asideDue">0 SAR</strong></div><div><span data-i18n="received">المبلغ المستلم</span><strong id="asideReceived">0 SAR</strong></div><div><span data-i18n="difference">الفرق</span><strong id="asideDiff">0 SAR</strong></div><div class="legend"><p><b class="dot worked"></b><span data-i18n="workday">يوم عمل</span></p><p><b class="dot forced"></b><span data-i18n="forcedLeave">إجازة تلقائية بعد 6 أيام</span></p><p><b class="dot current"></b><span data-i18n="currentDay">اليوم الحالي</span></p></div></aside></div>
-</section>
-<section class="panel table-panel">
- <div class="panel-title"><div><span class="eyebrow" data-i18n="details">التفاصيل</span><h3 data-i18n="shiftDetails">تفاصيل الشفتات</h3></div></div>
- <div class="table-wrap"><table><thead><tr><th data-i18n="date">التاريخ</th><th data-i18n="time">المدة</th><th data-i18n="amount">المبلغ</th><th data-i18n="hourRate">سعر الساعة</th><th data-i18n="edit">تعديل</th><th data-i18n="delete">حذف</th></tr></thead><tbody id="shiftRows"></tbody></table></div>
- <div class="settlement">
-  <label><span data-i18n="received">المبلغ المستلم</span><input type="number" id="receivedAmount" min="0" step="0.01" placeholder="0.00"></label>
-  <button class="primary" id="saveReceived"><span data-i18n="saveReceived">حفظ المبلغ المستلم</span></button>
-  <label class="check"><input type="checkbox" id="closeMonth"><span data-i18n="closeMonth">تم استلام الراتب وإغلاق الشهر</span></label>
-  <div class="difference-box"><span data-i18n="difference">الفرق</span><strong id="differenceValue">0.00 SAR</strong><em id="differenceStatus">كامل</em></div>
- </div>
-</section>
-</main>
-<div class="modal-backdrop" id="modal" hidden><div class="modal"><button class="modal-close" id="modalClose">×</button><div id="modalBody"></div></div></div>
-<div class="toast" id="toast"></div>
-<footer>CALREN © 2026</footer>
-<script src="app.js"></script>
-</body></html>
+
+  <div class="drawer-backdrop" id="drawerBackdrop" hidden></div>
+  <aside class="settings-drawer" id="settingsDrawer" aria-hidden="true">
+    <button class="drawer-close" id="drawerClose">×</button><h2 data-i18n="settings">الإعدادات</h2>
+    <button id="downloadJson">⇩ <span data-i18n="downloadJson">تحميل ملف JSON</span></button>
+    <label class="drawer-file">⇧ <span data-i18n="importJson">إضافة ملف JSON</span><input id="importJson" type="file" accept="application/json,.json" hidden></label>
+    <button id="resetData">↻ <span data-i18n="resetData">إعادة جميع البيانات</span></button>
+    <div class="account-email" id="accountEmail"></div>
+    <button id="drawerLanguage">🌐 <span data-i18n="language">اللغة</span></button>
+    <button id="themeBtn">◐ <span data-i18n="theme">لون الواجهة</span>: <b id="themeLabel">Emerald Green</b></button>
+    <button class="logout">⇥ <span data-i18n="logout">تسجيل خروج</span></button>
+  </aside>
+
+  <dialog id="editDialog"><form method="dialog" id="editForm"><button class="dialog-close" value="cancel">×</button><h2 data-i18n="editShift">تعديل الشفت</h2><input id="editId" type="hidden"><label><span data-i18n="date">التاريخ</span><input id="editDate" type="date" required></label><label><span data-i18n="hours">الساعات</span><input id="editHours" type="number" min="0" max="24" required></label><label><span data-i18n="minutes">الدقائق</span><input id="editMinutes" type="number" min="0" max="59" required></label><label><span data-i18n="hourlyRate">سعر الساعة</span><input id="editRate" type="number" min="0" step="0.25" required></label><button class="primary-btn" value="default" type="submit" data-i18n="save">حفظ</button></form></dialog>
+  <div class="toast" id="toast"></div>
+  <script src="app.js"></script>
+</body>
+</html>
